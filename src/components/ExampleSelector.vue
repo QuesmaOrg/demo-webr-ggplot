@@ -1,23 +1,3 @@
-<template>
-  <div class="example-selector">
-    <label for="example-select" class="label">Examples:</label>
-    <select
-      id="example-select"
-      v-model="selectedExample"
-      @change="handleExampleChange"
-      class="select"
-    >
-      <option value="">Select an example...</option>
-      <option v-for="example in examples" :key="example.id" :value="example.id">
-        {{ example.title }}
-      </option>
-    </select>
-    <div v-if="currentExample" class="example-info">
-      <p class="description">{{ currentExample.description }}</p>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { examples } from '@/data/examples'
@@ -39,6 +19,26 @@ const handleExampleChange = () => {
   }
 }
 </script>
+
+<template>
+  <div class="example-selector">
+    <label for="example-select" class="label">Examples:</label>
+    <select
+      id="example-select"
+      v-model="selectedExample"
+      @change="handleExampleChange"
+      class="select"
+    >
+      <option value="">Select an example...</option>
+      <option v-for="example in examples" :key="example.id" :value="example.id">
+        {{ example.title }}
+      </option>
+    </select>
+    <div v-if="currentExample" class="example-info">
+      <p class="description">{{ currentExample.description }}</p>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .example-selector {

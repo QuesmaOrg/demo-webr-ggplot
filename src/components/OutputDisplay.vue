@@ -1,36 +1,3 @@
-<template>
-  <div class="output-display">
-    <div class="output-header">
-      <h3 class="output-title">Output</h3>
-      <button v-if="messages.length > 0" @click="clearOutput" class="clear-btn">
-        Clear
-      </button>
-    </div>
-    
-    <div class="output-content" ref="outputRef">
-      <div v-if="isLoading" class="loading">
-        <div class="spinner"></div>
-        <span>Running R code...</span>
-      </div>
-      
-      <div v-if="messages.length === 0 && !isLoading" class="empty-state">
-        <p>Run some R code to see the output here</p>
-      </div>
-      
-      <div v-for="(message, index) in messages" :key="index" class="message" :class="message.type">
-        <div class="message-type">{{ message.type.toUpperCase() }}</div>
-        <div class="message-content">
-          <pre v-if="message.type === 'stdout' || message.type === 'stderr'">{{ message.content }}</pre>
-          <div v-else-if="message.type === 'plot'" class="plot-container">
-            <img :src="message.content" alt="R plot" class="plot-image" />
-          </div>
-          <div v-else class="message-text">{{ message.content }}</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, nextTick, watch } from 'vue'
 import type { WebRMessage } from '@/types'
@@ -68,6 +35,39 @@ watch(
   { deep: true }
 )
 </script>
+
+<template>
+  <div class="output-display">
+    <div class="output-header">
+      <h3 class="output-title">Output</h3>
+      <button v-if="messages.length > 0" @click="clearOutput" class="clear-btn">
+        Clear
+      </button>
+    </div>
+    
+    <div class="output-content" ref="outputRef">
+      <div v-if="isLoading" class="loading">
+        <div class="spinner"></div>
+        <span>Running R code...</span>
+      </div>
+      
+      <div v-if="messages.length === 0 && !isLoading" class="empty-state">
+        <p>Run some R code to see the output here</p>
+      </div>
+      
+      <div v-for="(message, index) in messages" :key="index" class="message" :class="message.type">
+        <div class="message-type">{{ message.type.toUpperCase() }}</div>
+        <div class="message-content">
+          <pre v-if="message.type === 'stdout' || message.type === 'stderr'">{{ message.content }}</pre>
+          <div v-else-if="message.type === 'plot'" class="plot-container">
+            <img :src="message.content" alt="R plot" class="plot-image" />
+          </div>
+          <div v-else class="message-text">{{ message.content }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .output-display {

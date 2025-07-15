@@ -1,43 +1,3 @@
-<template>
-  <div id="app">
-    <header class="header">
-      <h1 class="title">WebR ggplot2 & dplyr Demo</h1>
-      <p class="subtitle">Interactive R data visualization and manipulation in the browser</p>
-    </header>
-
-    <main class="main">
-      <div class="container">
-        <div class="sidebar">
-          <div class="controls">
-            <FileUpload @file-uploaded="handleFileUpload" @file-removed="handleFileRemoved" />
-            <ExampleSelector @example-selected="handleExampleSelect" />
-            <button @click="runCode" :disabled="!isReady || isLoading" class="run-button">
-              {{ isLoading ? 'Running...' : 'Run Code' }}
-            </button>
-          </div>
-        </div>
-
-        <div class="content">
-          <div class="editor-section">
-            <div class="section-header">
-              <h2 class="section-title">R Code Editor</h2>
-            </div>
-            <CodeEditor v-model="code" />
-          </div>
-
-          <div class="output-section">
-            <OutputDisplay
-              :messages="messages"
-              :is-loading="isLoading"
-              @clear="clearMessages"
-            />
-          </div>
-        </div>
-      </div>
-    </main>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import CodeEditor from './components/CodeEditor.vue'
@@ -91,6 +51,46 @@ onMounted(() => {
   initializeWebR()
 })
 </script>
+
+<template>
+  <div id="app">
+    <header class="header">
+      <h1 class="title">WebR ggplot2 & dplyr Demo</h1>
+      <p class="subtitle">Interactive R data visualization and manipulation in the browser</p>
+    </header>
+
+    <main class="main">
+      <div class="container">
+        <div class="sidebar">
+          <div class="controls">
+            <FileUpload @file-uploaded="handleFileUpload" @file-removed="handleFileRemoved" />
+            <ExampleSelector @example-selected="handleExampleSelect" />
+            <button @click="runCode" :disabled="!isReady || isLoading" class="run-button">
+              {{ isLoading ? 'Running...' : 'Run Code' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="content">
+          <div class="editor-section">
+            <div class="section-header">
+              <h2 class="section-title">R Code Editor</h2>
+            </div>
+            <CodeEditor v-model="code" />
+          </div>
+
+          <div class="output-section">
+            <OutputDisplay
+              :messages="messages"
+              :is-loading="isLoading"
+              @clear="clearMessages"
+            />
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</template>
 
 <style scoped>
 #app {

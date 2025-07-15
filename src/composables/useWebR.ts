@@ -6,8 +6,8 @@ export const useWebR = () => {
   const isLoading = ref(false)
   const messages = reactive<WebRMessage[]>([])
   
-  let webR: any = null
-  let shelter: any = null
+  let webR: typeof import('webr').WebR | null = null
+  let shelter: unknown = null
 
   const initializeWebR = async () => {
     try {
@@ -16,10 +16,8 @@ export const useWebR = () => {
       // Import WebR
       const { WebR } = await import('webr')
       
-      // Initialize WebR
+      // Initialize WebR with default configuration
       webR = new WebR({
-        serviceWorkerUrl: '/node_modules/webr/dist/webr-worker.js',
-        packageCacheDirectory: '/cache/',
         repoUrl: 'https://repo.r-wasm.org',
       })
       

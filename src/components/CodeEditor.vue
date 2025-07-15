@@ -1,9 +1,3 @@
-<template>
-  <div class="code-editor">
-    <div ref="editorRef" class="editor-container"></div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import * as monaco from 'monaco-editor'
@@ -63,6 +57,12 @@ onUnmounted(() => {
   }
 })
 </script>
+
+<template>
+  <div class="code-editor">
+    <div ref="editorRef" class="editor-container"></div>
+  </div>
+</template>
 
 <style scoped>
 .code-editor {
