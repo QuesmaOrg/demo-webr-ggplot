@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, nextTick, watch } from 'vue'
+import { ref, nextTick, watch, computed } from 'vue'
 import type { WebRMessage } from '@/types'
 
 interface Props {
@@ -27,6 +27,23 @@ const scrollToBottom = () => {
   })
 }
 
+const handlePlotLoad = () => {
+  console.log('Plot loaded successfully')
+  scrollToBottom()
+}
+
+const handlePlotError = (event: Event) => {
+  console.error('Plot load error:', event)
+}
+
+const plotMessages = computed(() => {
+  return props.messages.filter(message => message.type === 'plot')
+})
+
+const textMessages = computed(() => {
+  return props.messages.filter(message => message.type !== 'plot')
+})
+
 watch(
   () => props.messages,
   () => {
@@ -38,13 +55,6 @@ watch(
 
 <template>
   <div class="output-display">
-    <div class="output-header">
-      <h3 class="output-title">Output</h3>
-      <button v-if="messages.length > 0" @click="clearOutput" class="clear-btn">
-        Clear
-      </button>
-    </div>
-    
     <div class="output-content" ref="outputRef">
       <div v-if="isLoading" class="loading">
         <div class="spinner"></div>
@@ -55,16 +65,30 @@ watch(
         <p>Run some R code to see the output here</p>
       </div>
       
-      <div v-for="(message, index) in messages" :key="index" class="message" :class="message.type">
-        <div class="message-type">{{ message.type.toUpperCase() }}</div>
-        <div class="message-content">
-          <pre v-if="message.type === 'stdout' || message.type === 'stderr'">{{ message.content }}</pre>
-          <div v-else-if="message.type === 'plot'" class="plot-container">
-            <img :src="message.content" alt="R plot" class="plot-image" />
-          </div>
-          <div v-else class="message-text">{{ message.content }}</div>
+      <!-- Display all plots first -->
+      <div v-for="(message, index) in plotMessages" :key="'plot-' + index" class="message">
+        <div class="plot-container">
+          <img 
+            :src="message.content" 
+            alt="R plot" 
+            class="plot-image"
+            @load="handlePlotLoad"
+            @error="handlePlotError"
+          />
         </div>
       </div>
+      
+      <!-- Single foldable bar for all text output -->
+      <details v-if="textMessages.length > 0" class="text-output" open>
+        <summary class="output-summary">Console Output ({{ textMessages.length }})</summary>
+        <div class="output-text">
+          <div v-for="(message, index) in textMessages" :key="'text-' + index" class="text-message" :class="message.type">
+            <div class="message-type">{{ message.type.toUpperCase() }}:</div>
+            <pre v-if="message.type === 'stdout' || message.type === 'stderr'" class="message-content">{{ message.content }}</pre>
+            <div v-else class="message-content">{{ message.content }}</div>
+          </div>
+        </div>
+      </details>
     </div>
   </div>
 </template>
@@ -74,47 +98,13 @@ watch(
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
   background-color: #fff;
-}
-
-.output-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
-  background-color: #f9fafb;
-}
-
-.output-title {
-  margin: 0;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #374151;
-}
-
-.clear-btn {
-  padding: 0.25rem 0.75rem;
-  background-color: #6b7280;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.clear-btn:hover {
-  background-color: #4b5563;
 }
 
 .output-content {
   flex: 1;
   padding: 1rem;
   overflow-y: auto;
-  max-height: 500px;
 }
 
 .loading {
@@ -152,65 +142,133 @@ watch(
   overflow: hidden;
 }
 
-.message.stdout {
-  border-left: 4px solid #10b981;
+.text-output {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background-color: #f9fafb;
 }
 
-.message.stderr {
-  border-left: 4px solid #f59e0b;
+.output-summary {
+  padding: 0.75rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #6b7280;
+  background-color: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+  user-select: none;
 }
 
-.message.error {
-  border-left: 4px solid #ef4444;
+.output-summary:hover {
+  background-color: #e5e7eb;
 }
 
-.message.success {
+.output-text {
+  margin: 0;
+  padding: 1rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  color: #374151;
+  background-color: #fff;
+}
+
+.message-other {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background-color: #f9fafb;
+}
+
+.message-other.success {
   border-left: 4px solid #22c55e;
+  background-color: #f0fdf4;
 }
 
-.message.plot {
-  border-left: 4px solid #3b82f6;
+.message-other.error {
+  border-left: 4px solid #ef4444;
+  background-color: #fef2f2;
+}
+
+.message-other.warning {
+  border-left: 4px solid #f59e0b;
+  background-color: #fffbeb;
 }
 
 .message-type {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  padding: 0.25rem 0.5rem;
+  padding: 0.5rem 0.75rem;
   background-color: #f3f4f6;
   color: #6b7280;
-}
-
-.message-content {
-  padding: 0.5rem;
-  background-color: #f9fafb;
-}
-
-.message-content pre {
-  margin: 0;
-  font-family: 'Courier New', monospace;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .plot-container {
   text-align: center;
   padding: 1rem;
   background-color: white;
+  border-radius: 4px;
+  margin: 0.5rem 0;
 }
 
 .plot-image {
   max-width: 100%;
   height: auto;
   border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  display: block;
+  margin: 0 auto;
 }
 
-.message-text {
+.text-message {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.text-message:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.text-message .message-type {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #6b7280;
+  min-width: 4rem;
+  flex-shrink: 0;
+}
+
+.text-message.success .message-type {
+  color: #059669;
+}
+
+.text-message.error .message-type {
+  color: #dc2626;
+}
+
+.text-message.warning .message-type {
+  color: #d97706;
+}
+
+.text-message.stderr .message-type {
+  color: #d97706;
+}
+
+.text-message .message-content {
+  flex: 1;
+  margin: 0;
+  font-family: 'Courier New', monospace;
   font-size: 0.875rem;
-  color: #374151;
   line-height: 1.5;
+  white-space: pre-wrap;
+  color: #374151;
 }
 </style>

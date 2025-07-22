@@ -7,16 +7,16 @@ import OutputDisplay from './components/OutputDisplay.vue'
 import { useWebR } from './composables/useWebR'
 import type { RExample, CsvData } from './types'
 
-const code = ref(`# Welcome to WebR ggplot2 & dplyr Demo!
-# Select an example from the dropdown or write your own R code
+const code = ref(`# WebR ggplot2 & dplyr Demo
+# Select an example or write your own code
 
 library(ggplot2)
 library(dplyr)
 
-# Basic example with built-in data
-mtcars %>%
-  head(10) %>%
-  print()`)
+# Create your first visualization
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  theme_minimal()`)
 
 const {
   isReady,
@@ -60,32 +60,26 @@ onMounted(() => {
     </header>
 
     <main class="main">
+      <div class="toolbar">
+        <FileUpload @file-uploaded="handleFileUpload" @file-removed="handleFileRemoved" />
+        <ExampleSelector @example-selected="handleExampleSelect" />
+      </div>
+
       <div class="container">
-        <div class="sidebar">
-          <div class="controls">
-            <FileUpload @file-uploaded="handleFileUpload" @file-removed="handleFileRemoved" />
-            <ExampleSelector @example-selected="handleExampleSelect" />
+        <div class="editor-section">
+          <CodeEditor v-model="code" />
+          <div class="editor-controls">
             <button @click="runCode" :disabled="!isReady || isLoading" class="run-button">
               {{ isLoading ? 'Running...' : 'Run Code' }}
             </button>
           </div>
         </div>
 
-        <div class="content">
-          <div class="editor-section">
-            <div class="section-header">
-              <h2 class="section-title">R Code Editor</h2>
-            </div>
-            <CodeEditor v-model="code" />
-          </div>
-
-          <div class="output-section">
-            <OutputDisplay
-              :messages="messages"
-              :is-loading="isLoading"
-              @clear="clearMessages"
-            />
-          </div>
+        <div class="output-section">
+          <OutputDisplay
+            :messages="messages"
+            :is-loading="isLoading"
+          />
         </div>
       </div>
     </main>
@@ -102,14 +96,14 @@ onMounted(() => {
 .header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 2rem 0;
+  padding: 1.5rem 0;
   text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .title {
   margin: 0;
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
@@ -121,33 +115,28 @@ onMounted(() => {
   font-weight: 300;
 }
 
+
 .main {
   flex: 1;
 }
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 2rem;
-  align-items: start;
-}
-
-.sidebar {
+.toolbar {
   background: white;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 2rem;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.controls {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  height: calc(100vh - 140px);
 }
+
 
 .run-button {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -155,7 +144,7 @@ onMounted(() => {
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 6px;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -173,44 +162,43 @@ onMounted(() => {
   transform: none;
 }
 
-.content {
+
+.editor-section {
+  background: white;
+  border-right: 1px solid #e5e7eb;
+  padding: 1.5rem;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
 }
 
-.editor-section,
+.editor-controls {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .output-section {
   background: white;
-  border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  overflow: hidden;
 }
 
-.section-header {
-  margin-bottom: 1rem;
-}
-
-.section-title {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #374151;
-}
 
 @media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
   .container {
     grid-template-columns: 1fr;
-    padding: 1rem;
+    height: auto;
   }
   
   .title {
-    font-size: 2rem;
-  }
-  
-  .subtitle {
-    font-size: 1rem;
+    font-size: 1.75rem;
   }
 }
 </style>

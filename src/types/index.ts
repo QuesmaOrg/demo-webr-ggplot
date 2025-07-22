@@ -6,7 +6,7 @@ export interface RExample {
 }
 
 export interface WebRMessage {
-  type: 'stdout' | 'stderr' | 'error' | 'success'
+  type: 'stdout' | 'stderr' | 'error' | 'success' | 'plot'
   content: string
 }
 

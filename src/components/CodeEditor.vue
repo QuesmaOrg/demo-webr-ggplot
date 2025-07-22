@@ -33,6 +33,20 @@ onMounted(() => {
     scrollBeyondLastLine: false,
     wordWrap: 'on',
     automaticLayout: true,
+    // Disable features that require workers
+    links: false,
+    colorDecorators: false,
+    codeLens: false,
+    folding: false,
+    foldingStrategy: 'indentation',
+    showFoldingControls: 'never',
+    matchBrackets: 'never',
+    glyphMargin: false,
+    // Disable language features that need workers
+    suggest: { showWords: false },
+    quickSuggestions: false,
+    parameterHints: { enabled: false },
+    hover: { enabled: false },
   })
 
   editor.onDidChangeModelContent(() => {

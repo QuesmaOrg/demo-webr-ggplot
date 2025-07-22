@@ -3,7 +3,7 @@ import type { RExample } from '@/types'
 export const examples: RExample[] = [
   {
     id: 'basic-plot',
-    title: 'Basic ggplot2',
+    title: 'Basic example',
     description: 'Simple scatter plot with built-in mtcars dataset',
     code: `library(ggplot2)
 
@@ -31,8 +31,6 @@ mtcars_summary <- mtcars %>%
     count = n(),
     .groups = 'drop'
   )
-
-print(mtcars_summary)
 
 # Visualize the summary
 ggplot(mtcars_summary, aes(x = factor(cyl), y = avg_mpg)) +
@@ -87,27 +85,25 @@ ggplot(gear_summary, aes(x = factor(gear), y = count, fill = transmission)) +
   {
     id: 'csv-example',
     title: 'Work with uploaded CSV',
-    description: 'Template for working with uploaded CSV data',
-    code: `# This example assumes you've uploaded a CSV file
-# The data will be available as 'data' variable
+    description: 'Example showing CSV workflow with built-in data as placeholder',
+    code: `library(dplyr)
+library(ggplot2)
 
-# Uncomment and modify the following lines based on your CSV structure:
+# This example uses built-in iris dataset as placeholder
+# After uploading CSV, replace 'iris' with 'data'
+dataset <- iris
 
-# library(dplyr)
-# library(ggplot2)
+# Explore your data structure
+# str(dataset)  # Uncomment to see data structure
 
-# # View the first few rows
-# head(data)
-
-# # Basic summary
-# summary(data)
-
-# # Example plot (adjust column names as needed)
-# ggplot(data, aes(x = column1, y = column2)) +
-#   geom_point() +
-#   labs(title = "Your Data Visualization",
-#        x = "X-axis Label",
-#        y = "Y-axis Label") +
-#   theme_minimal()`,
+# Create a scatter plot
+ggplot(dataset, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+  geom_point(size = 3, alpha = 0.7) +
+  labs(title = "Sepal Dimensions by Species",
+       x = "Sepal Length (cm)",
+       y = "Sepal Width (cm)",
+       color = "Species") +
+  theme_minimal() +
+  theme(legend.position = "bottom")`,
   },
 ]

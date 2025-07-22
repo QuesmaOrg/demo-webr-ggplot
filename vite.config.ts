@@ -16,5 +16,8 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['webr']
+  },
+  define: {
+    global: 'globalThis'
   }
 })

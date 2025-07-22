@@ -55,125 +55,80 @@ const removeFile = () => {
 
 <template>
   <div class="file-upload">
-    <div class="upload-area" @drop="handleDrop" @dragover.prevent @dragenter.prevent>
+    <div v-if="!uploadedFile" class="upload-button" @click="$refs.fileInputRef?.click()">
       <input
         ref="fileInputRef"
         type="file"
         accept=".csv"
         @change="handleFileSelect"
         class="file-input"
+        style="display: none;"
       />
-      <div class="upload-content">
-        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          <polyline points="14,2 14,8 20,8" />
-          <line x1="16" y1="13" x2="8" y2="13" />
-          <line x1="16" y1="17" x2="8" y2="17" />
-          <polyline points="10,9 9,9 8,9" />
-        </svg>
-        <div class="upload-text">
-          <p class="primary-text">Drop CSV file here or click to browse</p>
-          <p class="secondary-text">Supported format: .csv</p>
-        </div>
-      </div>
+      📁 Upload Data
     </div>
-    <div v-if="uploadedFile" class="uploaded-file">
-      <div class="file-info">
-        <span class="file-name">{{ uploadedFile.name }}</span>
-        <button @click="removeFile" class="remove-btn">Remove</button>
-      </div>
+    <div v-else class="uploaded-file">
+      <span class="file-name">📄 {{ uploadedFile.name }}</span>
+      <button @click="removeFile" class="remove-btn">×</button>
     </div>
   </div>
 </template>
 
 <style scoped>
 .file-upload {
-  width: 100%;
-  margin-bottom: 1rem;
-}
-
-.upload-area {
-  border: 2px dashed #d1d5db;
-  border-radius: 8px;
-  padding: 2rem;
-  text-align: center;
-  cursor: pointer;
-  transition: border-color 0.3s ease;
-  position: relative;
-}
-
-.upload-area:hover {
-  border-color: #3b82f6;
-}
-
-.file-input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.upload-content {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  pointer-events: none;
 }
 
-.upload-icon {
-  width: 3rem;
-  height: 3rem;
-  color: #6b7280;
-}
-
-.upload-text {
-  text-align: center;
-}
-
-.primary-text {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #374151;
-  margin: 0;
-}
-
-.secondary-text {
+.upload-button {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
-  color: #6b7280;
-  margin: 0.25rem 0 0 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.upload-button:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
 }
 
 .uploaded-file {
-  margin-top: 1rem;
-  padding: 0.75rem;
-  background-color: #f3f4f6;
-  border-radius: 4px;
-}
-
-.file-info {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
+  background: #ecfdf5;
+  border: 1px solid #d1fae5;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
 }
 
 .file-name {
+  color: #065f46;
   font-weight: 500;
-  color: #374151;
 }
 
 .remove-btn {
-  background-color: #ef4444;
-  color: white;
+  background: none;
   border: none;
-  border-radius: 4px;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
+  color: #6b7280;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  padding: 0;
+  font-size: 1rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
 }
 
 .remove-btn:hover {
-  background-color: #dc2626;
+  background: #f3f4f6;
+  color: #374151;
 }
 </style>

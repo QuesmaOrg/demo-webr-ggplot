@@ -6,20 +6,29 @@ export const useWebR = () => {
   const isLoading = ref(false)
   const messages = reactive<WebRMessage[]>([])
   
-  let webR: typeof import('webr').WebR | null = null
-  let shelter: unknown = null
+  let webR: any = null
+  let shelter: any = null
 
   const initializeWebR = async () => {
     try {
       isLoading.value = true
       
-      // Import WebR
+      // Import WebR from installed package
       const { WebR } = await import('webr')
       
-      // Initialize WebR with default configuration
-      webR = new WebR({
-        repoUrl: 'https://repo.r-wasm.org',
-      })
+      // Initialize WebR with fallback channel types
+      try {
+        webR = new WebR({ 
+          interactive: false,
+          channelType: 0 // 0 = SharedArrayBuffer
+        })
+      } catch (error) {
+        console.log('SharedArrayBuffer not available, falling back to PostMessage')
+        webR = new WebR({ 
+          interactive: false,
+          channelType: 1 // 1 = PostMessage
+        })
+      }
       
       await webR.init()
       shelter = await new webR.Shelter()
@@ -54,11 +63,12 @@ export const useWebR = () => {
     try {
       isLoading.value = true
       
-      // Capture output
+      // Capture output and graphics
       const result = await shelter.captureR(code, {
         withAutoprint: true,
         captureStreams: true,
         captureConditions: false,
+        captureGraphics: true,
         env: webR.objs.globalEnv,
       })
 
@@ -73,26 +83,21 @@ export const useWebR = () => {
         }
       }
 
-      // Check for plots
-      const plots = await webR.evalR(`
-        if (length(dev.list()) > 0) {
-          plot_data <- .Last.value
-          if (exists('.Last.value') && inherits(.Last.value, 'ggplot')) {
-            tmp_file <- tempfile(fileext = '.svg')
-            ggsave(tmp_file, plot = .Last.value, width = 8, height = 6)
-            readLines(tmp_file, warn = FALSE)
-          } else {
-            NULL
+      // Handle captured graphics
+      if (result.images && result.images.length > 0) {
+        for (const img of result.images) {
+          // Create canvas and convert to data URL
+          const canvas = document.createElement('canvas')
+          canvas.width = img.width
+          canvas.height = img.height
+          
+          const ctx = canvas.getContext('2d')
+          if (ctx) {
+            ctx.drawImage(img, 0, 0)
+            const dataUrl = canvas.toDataURL()
+            addMessage('plot', dataUrl)
           }
-        } else {
-          NULL
         }
-      `)
-
-      if (plots && plots.values && plots.values.length > 0) {
-        const svgContent = plots.values.join('\n')
-        const dataUrl = `data:image/svg+xml;base64,${btoa(svgContent)}`
-        addMessage('plot', dataUrl)
       }
 
       // Process return value if it exists
