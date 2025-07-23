@@ -2,6 +2,21 @@ import type { RExample } from '@/types'
 
 export const examples: RExample[] = [
   {
+    id: 'getting-started',
+    title: 'Getting started',
+    description: 'Simple scatter plot to get you started with ggplot2',
+    code: `# WebR ggplot2 & dplyr Demo
+# Select an example or write your own code
+
+library(ggplot2)
+library(dplyr)
+
+# Create your first visualization
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  theme_minimal()`,
+  },
+  {
     id: 'basic-plot',
     title: 'Basic example',
     description: 'Simple scatter plot with built-in mtcars dataset',

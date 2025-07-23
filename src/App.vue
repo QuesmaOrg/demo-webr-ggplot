@@ -5,18 +5,11 @@ import FileUpload from './components/FileUpload.vue'
 import ExampleSelector from './components/ExampleSelector.vue'
 import OutputDisplay from './components/OutputDisplay.vue'
 import { useWebR } from './composables/useWebR'
+import { examples } from './data/examples'
 import type { RExample, CsvData } from './types'
 
-const code = ref(`# WebR ggplot2 & dplyr Demo
-# Select an example or write your own code
-
-library(ggplot2)
-library(dplyr)
-
-# Create your first visualization
-ggplot(mtcars, aes(x = wt, y = mpg)) +
-  geom_point() +
-  theme_minimal()`)
+// Start with the first example (getting-started)
+const code = ref(examples[0].code)
 
 const {
   isReady,
@@ -43,12 +36,16 @@ const handleFileRemoved = () => {
   executeCode('if (exists("data")) rm(data)')
 }
 
-const handleExampleSelect = (example: RExample) => {
+const handleExampleSelect = async (example: RExample) => {
   code.value = example.code
+  // Auto-execute the selected example
+  if (isReady.value && example.code.trim()) {
+    await executeCode(example.code)
+  }
 }
 
 onMounted(() => {
-  initializeWebR()
+  initializeWebR(code.value)
 })
 </script>
 

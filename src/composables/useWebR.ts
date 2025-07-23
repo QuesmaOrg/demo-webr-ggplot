@@ -9,7 +9,7 @@ export const useWebR = () => {
   let webR: any = null
   let shelter: any = null
 
-  const initializeWebR = async () => {
+  const initializeWebR = async (initialCode?: string) => {
     try {
       isLoading.value = true
       
@@ -38,6 +38,11 @@ export const useWebR = () => {
       
       isReady.value = true
       addMessage('success', 'WebR initialized successfully with ggplot2, dplyr, and ggrepel')
+      
+      // Auto-execute initial code if provided
+      if (initialCode && initialCode.trim()) {
+        await executeCode(initialCode)
+      }
     } catch (error) {
       console.error('WebR initialization failed:', error)
       addMessage('error', `Failed to initialize WebR: ${error}`)

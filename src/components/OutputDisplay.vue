@@ -36,8 +36,9 @@ const handlePlotError = (event: Event) => {
   console.error('Plot load error:', event)
 }
 
-const plotMessages = computed(() => {
-  return props.messages.filter(message => message.type === 'plot')
+const latestPlot = computed(() => {
+  const plots = props.messages.filter(message => message.type === 'plot')
+  return plots.length > 0 ? plots[plots.length - 1] : null
 })
 
 const textMessages = computed(() => {
@@ -65,27 +66,28 @@ watch(
         <p>Run some R code to see the output here</p>
       </div>
       
-      <!-- Display all plots first -->
-      <div v-for="(message, index) in plotMessages" :key="'plot-' + index" class="message">
-        <div class="plot-container">
-          <img 
-            :src="message.content" 
-            alt="R plot" 
-            class="plot-image"
-            @load="handlePlotLoad"
-            @error="handlePlotError"
-          />
-        </div>
+      <!-- Display latest chart prominently -->
+      <div v-if="latestPlot" class="chart-display">
+        <img 
+          :src="latestPlot.content" 
+          alt="R plot" 
+          class="chart-image"
+          @load="handlePlotLoad"
+          @error="handlePlotError"
+        />
       </div>
       
-      <!-- Single foldable bar for all text output -->
-      <details v-if="textMessages.length > 0" class="text-output" open>
-        <summary class="output-summary">Console Output ({{ textMessages.length }})</summary>
-        <div class="output-text">
-          <div v-for="(message, index) in textMessages" :key="'text-' + index" class="text-message" :class="message.type">
-            <div class="message-type">{{ message.type.toUpperCase() }}:</div>
-            <pre v-if="message.type === 'stdout' || message.type === 'stderr'" class="message-content">{{ message.content }}</pre>
-            <div v-else class="message-content">{{ message.content }}</div>
+      <!-- Minimized console output at bottom -->
+      <details v-if="textMessages.length > 0" class="console-output">
+        <summary class="console-summary">
+          <span class="console-icon">📜</span>
+          Console ({{ textMessages.length }})
+        </summary>
+        <div class="console-content">
+          <div v-for="(message, index) in textMessages" :key="'text-' + index" class="console-message" :class="message.type">
+            <span class="message-label">{{ message.type.toUpperCase() }}:</span>
+            <pre v-if="message.type === 'stdout' || message.type === 'stderr'" class="message-text">{{ message.content }}</pre>
+            <span v-else class="message-text">{{ message.content }}</span>
           </div>
         </div>
       </details>
@@ -103,8 +105,10 @@ watch(
 
 .output-content {
   flex: 1;
-  padding: 1rem;
+  padding: 0;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .loading {
@@ -142,133 +146,96 @@ watch(
   overflow: hidden;
 }
 
-.text-output {
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  background-color: #f9fafb;
-}
-
-.output-summary {
-  padding: 0.75rem;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: #6b7280;
-  background-color: #f3f4f6;
-  border-bottom: 1px solid #e5e7eb;
-  user-select: none;
-}
-
-.output-summary:hover {
-  background-color: #e5e7eb;
-}
-
-.output-text {
-  margin: 0;
+.chart-display {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
   padding: 1rem;
-  font-family: 'Courier New', monospace;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  color: #374151;
-  background-color: #fff;
+  background: #fff;
 }
 
-.message-other {
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  background-color: #f9fafb;
-}
-
-.message-other.success {
-  border-left: 4px solid #22c55e;
-  background-color: #f0fdf4;
-}
-
-.message-other.error {
-  border-left: 4px solid #ef4444;
-  background-color: #fef2f2;
-}
-
-.message-other.warning {
-  border-left: 4px solid #f59e0b;
-  background-color: #fffbeb;
-}
-
-.message-type {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  padding: 0.5rem 0.75rem;
-  background-color: #f3f4f6;
-  color: #6b7280;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.plot-container {
-  text-align: center;
-  padding: 1rem;
-  background-color: white;
-  border-radius: 4px;
-  margin: 0.5rem 0;
-}
-
-.plot-image {
+.chart-image {
   max-width: 100%;
+  max-height: 100%;
   height: auto;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  background-color: white;
-  display: block;
-  margin: 0 auto;
 }
 
-.text-message {
+.console-output {
+  border-top: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  margin-top: auto;
+}
+
+.console-summary {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: #6b7280;
+  background-color: #f3f4f6;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.console-summary:hover {
+  background-color: #e5e7eb;
+}
+
+.console-icon {
+  font-size: 0.875rem;
+}
+
+.console-content {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0.75rem;
+  background-color: #fff;
+  border-top: 1px solid #e5e7eb;
+}
+
+.console-message {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.text-message:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
-.text-message .message-type {
+  margin-bottom: 0.5rem;
   font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.console-message:last-child {
+  margin-bottom: 0;
+}
+
+.message-label {
   font-weight: 600;
   text-transform: uppercase;
   color: #6b7280;
-  min-width: 4rem;
+  min-width: 3rem;
   flex-shrink: 0;
 }
 
-.text-message.success .message-type {
+.console-message.success .message-label {
   color: #059669;
 }
 
-.text-message.error .message-type {
+.console-message.error .message-label {
   color: #dc2626;
 }
 
-.text-message.warning .message-type {
+.console-message.stderr .message-label {
   color: #d97706;
 }
 
-.text-message.stderr .message-type {
-  color: #d97706;
-}
-
-.text-message .message-content {
+.message-text {
   flex: 1;
   margin: 0;
   font-family: 'Courier New', monospace;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  white-space: pre-wrap;
   color: #374151;
+  white-space: pre-wrap;
 }
+
+
 </style>

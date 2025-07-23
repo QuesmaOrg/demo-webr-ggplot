@@ -7,7 +7,7 @@ const emit = defineEmits<{
   exampleSelected: [example: RExample]
 }>()
 
-const selectedExample = ref<string>('')
+const selectedExample = ref<string>('getting-started')
 
 const currentExample = computed(() => {
   return examples.find((ex) => ex.id === selectedExample.value) || null
@@ -28,7 +28,6 @@ const handleExampleChange = () => {
       @change="handleExampleChange"
       class="select"
     >
-      <option value="">Examples ▼</option>
       <option v-for="example in examples" :key="example.id" :value="example.id">
         {{ example.title }}
       </option>
