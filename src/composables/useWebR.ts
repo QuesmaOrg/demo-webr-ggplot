@@ -34,10 +34,10 @@ export const useWebR = () => {
       shelter = await new webR.Shelter()
       
       // Install required packages
-      await webR.installPackages(['ggplot2', 'dplyr'])
+      await webR.installPackages(['ggplot2', 'dplyr', 'ggrepel'])
       
       isReady.value = true
-      addMessage('success', 'WebR initialized successfully with ggplot2 and dplyr')
+      addMessage('success', 'WebR initialized successfully with ggplot2, dplyr, and ggrepel')
     } catch (error) {
       console.error('WebR initialization failed:', error)
       addMessage('error', `Failed to initialize WebR: ${error}`)

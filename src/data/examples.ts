@@ -106,4 +106,35 @@ ggplot(dataset, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
   theme_minimal() +
   theme(legend.position = "bottom")`,
   },
+  {
+    id: 'metal-bands-happiness',
+    title: 'Metal bands vs happiness',
+    description: 'Correlation between metal bands per capita and happiness score by country',
+    code: `library(ggplot2)
+library(ggrepel)
+
+# Note: This example requires the metal_bands_happiness.csv file to be uploaded
+# For now, we'll create sample data to demonstrate the visualization
+
+# Sample data (replace with real data when CSV is uploaded)
+df <- data.frame(
+  Country.or.region = c("Finland", "Sweden", "Norway", "Denmark", "Iceland", 
+                       "Switzerland", "Netherlands", "Canada", "New Zealand", "Austria",
+                       "Germany", "United Kingdom", "United States", "France", "Spain"),
+  Metal.bands.per.capita = c(630, 428, 309, 295, 340, 179, 158, 152, 143, 156,
+                           171, 147, 72, 89, 87),
+  Score = c(7.8, 7.6, 7.5, 7.5, 7.5, 7.5, 7.4, 7.2, 7.2, 7.2,
+           7.0, 6.9, 6.9, 6.6, 6.4)
+)
+
+ggplot(df, aes(x = Metal.bands.per.capita, y = Score, label = Country.or.region)) +
+  scale_x_log10() +
+  stat_smooth(method = "lm", linewidth = 0.5, alpha = 0.2) +
+  geom_point(color = "red", size = 0.5) +
+  geom_text_repel(size = 3, point.size = 0.5, segment.alpha = 0.5, segment.color = "red") +
+  xlab("Metal bands per 1M people") +
+  ylab("Average happiness score") +
+  labs(caption = "Data sources: Enc. Metallum (2016), after Jakub Marian; World Happiness Report (2022). Chart by Piotr Migdał, p.migdal.pl, CC-BY.") +
+  theme_minimal()`,
+  },
 ]
