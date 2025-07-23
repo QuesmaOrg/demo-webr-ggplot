@@ -5,6 +5,7 @@ import type { WebRMessage } from '@/types'
 interface Props {
   messages: WebRMessage[]
   isLoading: boolean
+  showConsoleBelow?: boolean
 }
 
 const props = defineProps<Props>()
@@ -76,21 +77,6 @@ watch(
           @error="handlePlotError"
         />
       </div>
-      
-      <!-- Minimized console output at bottom -->
-      <details v-if="textMessages.length > 0" class="console-output">
-        <summary class="console-summary">
-          <span class="console-icon">📜</span>
-          Console ({{ textMessages.length }})
-        </summary>
-        <div class="console-content">
-          <div v-for="(message, index) in textMessages" :key="'text-' + index" class="console-message" :class="message.type">
-            <span class="message-label">{{ message.type.toUpperCase() }}:</span>
-            <pre v-if="message.type === 'stdout' || message.type === 'stderr'" class="message-text">{{ message.content }}</pre>
-            <span v-else class="message-text">{{ message.content }}</span>
-          </div>
-        </div>
-      </details>
     </div>
   </div>
 </template>
@@ -151,7 +137,7 @@ watch(
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 1rem;
+  padding: 0;
   background: #fff;
 }
 
@@ -163,36 +149,52 @@ watch(
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.console-output {
+.console-section {
   border-top: 1px solid #e5e7eb;
   background-color: #f9fafb;
   margin-top: auto;
 }
 
 .console-summary {
-  padding: 0.5rem 1rem;
-  cursor: pointer;
+  padding: 0.75rem 1rem;
   font-size: 0.75rem;
   color: #6b7280;
-  background-color: #f3f4f6;
-  user-select: none;
+  background-color: #f9fafb;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+  min-height: 20px;
 }
 
 .console-summary:hover {
-  background-color: #e5e7eb;
+  background-color: #f3f4f6;
 }
 
-.console-icon {
-  font-size: 0.875rem;
+.console-title {
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
-.console-content {
-  max-height: 200px;
+.console-count {
+  color: #9ca3af;
+}
+
+.console-arrow {
+  margin-left: auto;
+  font-size: 0.625rem;
+  transition: transform 0.3s ease;
+}
+
+.console-section[open] .console-arrow {
+  transform: rotate(180deg);
+}
+
+.console-messages {
+  max-height: 150px;
   overflow-y: auto;
-  padding: 0.75rem;
+  padding: 0.5rem;
   background-color: #fff;
   border-top: 1px solid #e5e7eb;
 }
