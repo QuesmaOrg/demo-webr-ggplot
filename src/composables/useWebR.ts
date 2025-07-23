@@ -4,6 +4,8 @@ import type { WebRMessage, CsvData } from '@/types'
 export const useWebR = () => {
   const isReady = ref(false)
   const isLoading = ref(false)
+  const loadingStatus = ref('')
+  const installedLibraries = reactive(new Set<string>())
   const messages = reactive<WebRMessage[]>([])
   
   let webR: any = null
@@ -12,6 +14,7 @@ export const useWebR = () => {
   const initializeWebR = async (initialCode?: string) => {
     try {
       isLoading.value = true
+      loadingStatus.value = 'Initializing WebR...'
       
       // Import WebR from installed package
       const { WebR } = await import('webr')
@@ -33,10 +36,16 @@ export const useWebR = () => {
       await webR.init()
       shelter = await new webR.Shelter()
       
-      // Install required packages
-      await webR.installPackages(['ggplot2', 'dplyr', 'ggrepel'])
+      // Install packages one by one with status updates
+      const packages = ['ggplot2', 'dplyr', 'ggrepel']
+      for (const pkg of packages) {
+        loadingStatus.value = `Installing ${pkg}...`
+        await webR.installPackages([pkg])
+        installedLibraries.add(pkg)
+      }
       
       isReady.value = true
+      loadingStatus.value = 'WebR Ready'
       addMessage('success', 'WebR initialized successfully with ggplot2, dplyr, and ggrepel')
       
       // Auto-execute initial code if provided
@@ -45,6 +54,7 @@ export const useWebR = () => {
       }
     } catch (error) {
       console.error('WebR initialization failed:', error)
+      loadingStatus.value = 'WebR Failed'
       addMessage('error', `Failed to initialize WebR: ${error}`)
     } finally {
       isLoading.value = false
@@ -155,13 +165,39 @@ export const useWebR = () => {
     }
   }
 
+  const toggleLibrary = async (library: string, install: boolean) => {
+    if (!webR) return
+    
+    try {
+      if (install) {
+        loadingStatus.value = `Installing ${library}...`
+        isLoading.value = true
+        await webR.installPackages([library])
+        installedLibraries.add(library)
+        addMessage('success', `${library} installed successfully`)
+      } else {
+        // Note: WebR doesn't support uninstalling packages
+        installedLibraries.delete(library)
+        addMessage('info', `${library} removed from available libraries`)
+      }
+    } catch (error) {
+      addMessage('error', `Failed to install ${library}: ${error}`)
+    } finally {
+      isLoading.value = false
+      loadingStatus.value = isReady.value ? 'WebR Ready' : loadingStatus.value
+    }
+  }
+
   return {
     isReady,
     isLoading,
+    loadingStatus,
+    installedLibraries,
     messages,
     initializeWebR,
     executeCode,
     uploadCsvData,
     clearMessages,
+    toggleLibrary,
   }
 }

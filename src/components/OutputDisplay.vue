@@ -229,6 +229,10 @@ watch(
   color: #d97706;
 }
 
+.console-message.info .message-label {
+  color: #2563eb;
+}
+
 .message-text {
   flex: 1;
   margin: 0;

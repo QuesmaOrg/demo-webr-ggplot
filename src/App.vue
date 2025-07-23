@@ -4,6 +4,8 @@ import CodeEditor from './components/CodeEditor.vue'
 import FileUpload from './components/FileUpload.vue'
 import ExampleSelector from './components/ExampleSelector.vue'
 import OutputDisplay from './components/OutputDisplay.vue'
+import WebRStatus from './components/WebRStatus.vue'
+import LibrarySelector from './components/LibrarySelector.vue'
 import { useWebR } from './composables/useWebR'
 import { examples } from './data/examples'
 import type { RExample, CsvData } from './types'
@@ -14,11 +16,14 @@ const code = ref(examples[0].code)
 const {
   isReady,
   isLoading,
+  loadingStatus,
+  installedLibraries,
   messages,
   initializeWebR,
   executeCode,
   uploadCsvData,
   clearMessages,
+  toggleLibrary,
 } = useWebR()
 
 const runCode = async () => {
@@ -58,8 +63,22 @@ onMounted(() => {
 
     <main class="main">
       <div class="toolbar">
-        <FileUpload @file-uploaded="handleFileUpload" @file-removed="handleFileRemoved" />
-        <ExampleSelector @example-selected="handleExampleSelect" />
+        <div class="toolbar-left">
+          <FileUpload @file-uploaded="handleFileUpload" @file-removed="handleFileRemoved" />
+          <ExampleSelector @example-selected="handleExampleSelect" />
+        </div>
+        <div class="toolbar-right">
+          <WebRStatus 
+            :is-ready="isReady" 
+            :is-loading="isLoading" 
+            :loading-status="loadingStatus" 
+          />
+          <LibrarySelector 
+            :installed-libraries="installedLibraries" 
+            :is-loading="isLoading"
+            @toggle-library="toggleLibrary"
+          />
+        </div>
       </div>
 
       <div class="container">
@@ -122,9 +141,21 @@ onMounted(() => {
   border-bottom: 1px solid #e5e7eb;
   padding: 1rem 2rem;
   display: flex;
-  gap: 1.5rem;
+  justify-content: space-between;
   align-items: center;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-left {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.toolbar-right {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
 }
 
 .container {
