@@ -159,9 +159,12 @@ onMounted(() => {
 
 <style scoped>
 #app {
-  min-height: 100vh;
+  height: 100vh;
   background-color: #f8fafc;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .header {
@@ -170,6 +173,7 @@ onMounted(() => {
   padding: 1.5rem 0;
   text-align: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .title {
@@ -189,6 +193,9 @@ onMounted(() => {
 
 .main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .toolbar {
@@ -199,6 +206,7 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .toolbar-left {
@@ -214,10 +222,11 @@ onMounted(() => {
 }
 
 .container {
+  flex: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
-  height: calc(100vh - 200px);
+  overflow: hidden;
 }
 
 
@@ -257,14 +266,16 @@ onMounted(() => {
 .editor-section {
   background: white;
   border-right: 1px solid #e5e7eb;
-  padding: 0;
-  overflow: hidden;
+  padding: 1rem;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .output-section {
   background: white;
   padding: 0;
-  overflow: hidden;
+  overflow: auto;
   position: relative;
 }
 
@@ -384,6 +395,7 @@ onMounted(() => {
   align-items: center;
   box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
   height: 60px;
+  flex-shrink: 0;
 }
 
 .bottom-bar-left {
