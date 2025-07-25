@@ -19,7 +19,14 @@ const availableLibraries = [
   { name: 'dplyr', description: 'Data manipulation' },
   { name: 'ggrepel', description: 'Repel text labels' },
   { name: 'tidyr', description: 'Tidy messy data' },
-  { name: 'readr', description: 'Read rectangular data' }
+  { name: 'tibble', description: 'Modern data frames' },
+  { name: 'httr', description: 'HTTP client' },
+  { name: 'jsonlite', description: 'JSON parser' },
+  { name: 'ggthemes', description: 'Extra themes for ggplot2' },
+  { name: 'ragg', description: 'AGG graphics device' },
+  { name: 'zoo', description: 'Time series infrastructure' },
+  { name: 'lubridate', description: 'Date/time handling' },
+  { name: 'tidyverse', description: 'Collection of R packages' }
 ]
 
 const installedCount = computed(() => props.installedLibraries.size)
