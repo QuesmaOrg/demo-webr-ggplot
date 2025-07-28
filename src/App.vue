@@ -24,7 +24,6 @@ const {
   initializeWebR,
   executeCode,
   uploadCsvData,
-  clearMessages,
   toggleLibrary,
 } = useWebR()
 

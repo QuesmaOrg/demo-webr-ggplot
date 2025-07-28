@@ -10,15 +10,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const emit = defineEmits<{
-  clear: []
-}>()
-
 const outputRef = ref<HTMLElement>()
-
-const clearOutput = () => {
-  emit('clear')
-}
 
 const scrollToBottom = () => {
   nextTick(() => {
@@ -42,9 +34,6 @@ const latestPlot = computed(() => {
   return plots.length > 0 ? plots[plots.length - 1] : null
 })
 
-const textMessages = computed(() => {
-  return props.messages.filter(message => message.type !== 'plot')
-})
 
 watch(
   () => props.messages,
