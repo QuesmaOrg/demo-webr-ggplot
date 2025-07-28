@@ -15,18 +15,14 @@ const emit = defineEmits<{
 const isOpen = ref(false)
 
 const availableLibraries = [
-  { name: 'ggplot2', description: 'Grammar of graphics' },
-  { name: 'dplyr', description: 'Data manipulation' },
-  { name: 'ggrepel', description: 'Repel text labels' },
-  { name: 'tidyr', description: 'Tidy messy data' },
-  { name: 'tibble', description: 'Modern data frames' },
-  { name: 'httr', description: 'HTTP client' },
-  { name: 'jsonlite', description: 'JSON parser' },
-  { name: 'ggthemes', description: 'Extra themes for ggplot2' },
-  { name: 'ragg', description: 'AGG graphics device' },
-  { name: 'zoo', description: 'Time series infrastructure' },
-  { name: 'lubridate', description: 'Date/time handling' },
-  { name: 'tidyverse', description: 'Collection of R packages' }
+  { name: 'tidyverse', description: 'Complete data science toolkit' },
+  { name: 'ggplot2', description: 'Create elegant data visualizations' },
+  { name: 'dplyr', description: 'Fast data manipulation with verbs' },
+  { name: 'tidyr', description: 'Reshape and tidy messy data' },
+  { name: 'ggrepel', description: 'Automatically position text labels' },
+  { name: 'ggthemes', description: 'Professional themes & color palettes' },
+  { name: 'lubridate', description: 'Work with dates and times easily' },
+  { name: 'zoo', description: 'Handle irregular time series data' }
 ]
 
 const installedCount = computed(() => props.installedLibraries.size)
