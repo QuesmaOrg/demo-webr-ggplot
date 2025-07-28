@@ -13,4 +13,7 @@ export interface WebRMessage {
 export interface CsvData {
   name: string
   content: string
+  rows: number
+  columns: number
+  columnNames: string[]
 }
