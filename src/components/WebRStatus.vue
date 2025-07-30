@@ -10,7 +10,14 @@ defineProps<Props>()
 
 <template>
   <div class="webr-status">
-    <div class="status-indicator" :class="{ 'loading': isLoading, 'ready': isReady && !isLoading, 'error': !isReady && !isLoading && loadingStatus.includes('Failed') }">
+    <div 
+      class="status-indicator" 
+      :class="{ 
+        'loading': isLoading, 
+        'ready': isReady && !isLoading, 
+        'error': !isReady && !isLoading && loadingStatus.includes('Failed') 
+      }"
+    >
       <div v-if="isLoading" class="spinner"></div>
       <span v-else-if="isReady" class="status-icon">✓</span>
       <span v-else-if="loadingStatus.includes('Failed')" class="status-icon">✗</span>

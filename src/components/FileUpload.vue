@@ -106,7 +106,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="file-upload" ref="dropdownRef">
+  <div ref="dropdownRef" class="file-upload">
     <div 
       v-if="!uploadedFile" 
       class="upload-button"
@@ -120,9 +120,9 @@ onUnmounted(() => {
         ref="fileInputRef"
         type="file"
         accept=".csv"
-        @change="handleFileSelect"
         class="file-input"
         style="display: none;"
+        @change="handleFileSelect"
       />
       <span class="upload-icon">📁</span>
       <span class="upload-text">Upload CSV</span>
@@ -131,8 +131,8 @@ onUnmounted(() => {
     
     <div v-else class="csv-info-container">
       <button 
-        @click="toggleDropdown"
         class="csv-button"
+        @click="toggleDropdown"
       >
         <span class="csv-icon">📊</span>
         <span class="csv-text">{{ uploadedFile.name }} ({{ uploadedFile.rows }} × {{ uploadedFile.columns }})</span>
@@ -142,7 +142,7 @@ onUnmounted(() => {
       <div v-if="isOpen" class="csv-dropdown">
         <div class="csv-header">
           <span class="header-text">CSV Information</span>
-          <button @click="removeFile" class="remove-btn" title="Remove file">×</button>
+          <button class="remove-btn" title="Remove file" @click="removeFile">×</button>
         </div>
         <div class="csv-details">
           <div class="detail-item">

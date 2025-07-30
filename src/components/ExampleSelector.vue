@@ -25,8 +25,8 @@ const handleExampleChange = () => {
     <select
       id="example-select"
       v-model="selectedExample"
-      @change="handleExampleChange"
       class="select"
+      @change="handleExampleChange"
     >
       <option v-for="example in examples" :key="example.id" :value="example.id">
         {{ example.title }}

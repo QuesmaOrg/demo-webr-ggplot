@@ -51,7 +51,7 @@ const handleFileUpload = async (csvData: CsvData) => {
 
 const handleFileRemoved = () => {
   // Clear any data-related variables in R
-  executeCode('if (exists("data")) rm(data)')
+  void executeCode('if (exists("data")) rm(data)')
 }
 
 const handleExampleSelect = async (example: RExample) => {
@@ -64,7 +64,7 @@ const handleExampleSelect = async (example: RExample) => {
 }
 
 onMounted(() => {
-  initializeWebR(code.value)
+  void initializeWebR(code.value)
   // Set initial executed code after auto-execution
   setTimeout(() => {
     lastExecutedCode.value = code.value
@@ -114,12 +114,20 @@ onMounted(() => {
             <div class="console-content">
               <div class="console-header">
                 <span class="console-title">Console Output</span>
-                <button @click="showConsole = false" class="console-close">×</button>
+                <button class="console-close" @click="showConsole = false">×</button>
               </div>
               <div class="console-messages">
-                <div v-for="(message, index) in textMessages" :key="'text-' + index" class="console-message" :class="message.type">
+                <div 
+                  v-for="(message, index) in textMessages" 
+                  :key="'text-' + index" 
+                  class="console-message" 
+                  :class="message.type"
+                >
                   <span class="message-label">{{ message.type.toUpperCase() }}:</span>
-                  <pre v-if="message.type === 'stdout' || message.type === 'stderr'" class="message-text">{{ message.content }}</pre>
+                  <pre 
+                    v-if="message.type === 'stdout' || message.type === 'stderr'" 
+                    class="message-text"
+                  >{{ message.content }}</pre>
                   <span v-else class="message-text">{{ message.content }}</span>
                 </div>
               </div>
@@ -132,10 +140,10 @@ onMounted(() => {
       <div class="bottom-bar">
         <div class="bottom-bar-left">
           <button 
-            @click="runCode" 
             :disabled="!isReady || isLoading" 
-            :class="{ 'has-changes': hasChanges, 'no-changes': !hasChanges }"
+            :class="{ 'has-changes': hasChanges, 'no-changes': !hasChanges }" 
             class="run-button"
+            @click="runCode"
           >
             {{ isLoading ? 'Running...' : 'Run Code' }}
           </button>
@@ -143,9 +151,9 @@ onMounted(() => {
         <div class="bottom-bar-right">
           <button 
             v-if="textMessages.length > 0"
-            @click="showConsole = !showConsole"
             class="console-toggle"
             :class="{ 'has-errors': hasErrors }"
+            @click="showConsole = !showConsole"
           >
             Console ({{ textMessages.length }})
             <span class="toggle-arrow" :class="{ 'open': showConsole }">▼</span>

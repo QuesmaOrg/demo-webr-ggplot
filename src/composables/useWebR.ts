@@ -166,7 +166,7 @@ export const useWebR = () => {
   }
 
   const toggleLibrary = async (library: string, install: boolean) => {
-    if (!webR) return
+    if (!webR) {return}
     
     try {
       if (install) {

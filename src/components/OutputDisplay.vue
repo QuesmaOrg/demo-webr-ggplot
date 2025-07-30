@@ -13,7 +13,7 @@ const props = defineProps<Props>()
 const outputRef = ref<HTMLElement>()
 
 const scrollToBottom = () => {
-  nextTick(() => {
+  void nextTick(() => {
     if (outputRef.value) {
       outputRef.value.scrollTop = outputRef.value.scrollHeight
     }
@@ -46,7 +46,7 @@ watch(
 
 <template>
   <div class="output-display">
-    <div class="output-content" ref="outputRef">
+    <div ref="outputRef" class="output-content">
       <div v-if="isLoading" class="loading">
         <div class="spinner"></div>
         <span>Running R code...</span>
@@ -231,6 +231,4 @@ watch(
   color: #374151;
   white-space: pre-wrap;
 }
-
-
 </style>

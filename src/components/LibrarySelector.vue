@@ -56,12 +56,12 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="library-selector" ref="dropdownRef">
+  <div ref="dropdownRef" class="library-selector">
     <button 
-      @click="toggleDropdown"
       :disabled="isLoading"
       class="libraries-button"
       :class="{ 'disabled': isLoading }"
+      @click="toggleDropdown"
     >
       <span class="libraries-icon">📚</span>
       <span class="libraries-text">Libraries ({{ installedCount }})</span>
@@ -83,8 +83,8 @@ onUnmounted(() => {
             type="checkbox" 
             :checked="installedLibraries.has(library.name)"
             :disabled="isLoading"
-            @change="handleToggle(library.name, $event)"
             class="library-checkbox"
+            @change="handleToggle(library.name, $event)"
           />
           <div class="library-info">
             <span class="library-name">{{ library.name }}</span>

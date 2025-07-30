@@ -19,7 +19,7 @@ const editorRef = ref<HTMLElement>()
 let editor: monaco.editor.IStandaloneCodeEditor | null = null
 
 onMounted(() => {
-  if (!editorRef.value) return
+  if (!editorRef.value) {return}
 
   editor = monaco.editor.create(editorRef.value, {
     value: props.modelValue,
