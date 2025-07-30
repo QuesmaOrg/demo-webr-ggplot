@@ -8,12 +8,27 @@ import WebRStatus from './components/WebRStatus.vue'
 import LibrarySelector from './components/LibrarySelector.vue'
 import { useWebR } from './composables/useWebR'
 import { examples } from './data/examples'
+import { icons } from './data/icons'
 import type { RExample, CsvData } from './types'
+
+// Constants
+const GITHUB_REPO_OWNER = 'QuesmaOrg'
+const GITHUB_REPO_NAME = 'demo-webr-ggplot'
+const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}`
+
+// Types
+interface GitHubRepo {
+  stargazers_count: number
+  [key: string]: unknown
+}
 
 // Start with the first example (getting-started)
 const code = ref(examples[0].code)
 const lastExecutedCode = ref('')
 const hasChanges = computed(() => code.value !== lastExecutedCode.value)
+
+// GitHub stars
+const githubStars = ref<number | null>(null)
 
 const {
   isReady,
@@ -63,20 +78,56 @@ const handleExampleSelect = async (example: RExample) => {
   }
 }
 
+// Fetch GitHub stars
+const fetchGitHubStars = async () => {
+  try {
+    const response = await fetch(GITHUB_API_URL)
+    if (response.ok) {
+      const data = await response.json() as GitHubRepo
+      githubStars.value = data.stargazers_count
+    }
+  } catch (error) {
+    console.error('Failed to fetch GitHub stars:', error)
+  }
+}
+
 onMounted(() => {
   void initializeWebR(code.value)
   // Set initial executed code after auto-execution
   setTimeout(() => {
     lastExecutedCode.value = code.value
   }, 100)
+  // Fetch GitHub stars
+  void fetchGitHubStars()
 })
 </script>
 
 <template>
   <div id="app">
     <header class="header">
-      <h1 class="title">WebR ggplot2 & dplyr Demo</h1>
-      <p class="subtitle">Interactive R data visualization and manipulation in the browser</p>
+      <div class="header-content">
+        <div>
+          <h1 class="title">WebR ggplot2 & dplyr Demo</h1>
+          <p class="subtitle">Interactive R data visualization and manipulation in the browser</p>
+        </div>
+        <a
+          href="https://github.com/QuesmaOrg/demo-webr-ggplot"
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="github-link"
+          aria-label="View on GitHub">
+          <svg class="github-icon" :viewBox="icons.github.viewBox" width="16" height="16">
+            <path fill="currentColor" :d="icons.github.path" />
+          </svg>
+          <span class="github-text">View on GitHub</span>
+          <span v-if="githubStars !== null" class="github-stars">
+            <svg :viewBox="icons.star.viewBox" width="14" height="14" class="star-icon">
+              <path fill="currentColor" :d="icons.star.path" />
+            </svg>
+            {{ githubStars }}
+          </span>
+        </a>
+      </div>
     </header>
 
     <main class="main">
@@ -177,10 +228,17 @@ onMounted(() => {
 .header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 1.5rem 0;
-  text-align: center;
+  padding: 1.5rem 2rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .title {
@@ -195,6 +253,52 @@ onMounted(() => {
   font-size: 1.125rem;
   opacity: 0.9;
   font-weight: 300;
+}
+
+.github-link {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.github-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.github-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.github-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.github-stars {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding-left: 0.75rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.star-icon {
+  width: 14px;
+  height: 14px;
+  color: #fbbf24;
 }
 
 
