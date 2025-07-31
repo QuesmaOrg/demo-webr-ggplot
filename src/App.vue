@@ -165,11 +165,16 @@ const fetchGitHubStars = async () => {
   }
 }
 
-onMounted(() => {
-  // Initialize WebR without auto-executing the initial code
-  void initializeWebR('')
+onMounted(async () => {
+  // Initialize WebR first
+  await initializeWebR('')
   // Fetch GitHub stars
   void fetchGitHubStars()
+  
+  // Execute the first example once WebR is ready
+  if (isReady.value && examples.length > 0) {
+    await handleExampleSelect(examples[0])
+  }
 })
 </script>
 
