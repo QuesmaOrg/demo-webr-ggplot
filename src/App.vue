@@ -42,6 +42,7 @@ const {
   initializeWebR,
   executeCode,
   uploadCsvData,
+  clearMessages,
   toggleLibrary,
 } = useWebR()
 
@@ -58,8 +59,15 @@ const hasErrors = computed(() => {
 
 const runCode = async () => {
   if (code.value.trim()) {
+    clearMessages() // Clear console and charts before running
     await executeCode(code.value)
     lastExecutedCode.value = code.value
+    
+    // Auto-open console if no plots were generated
+    const hasPlots = messages.some(msg => msg.type === 'plot')
+    if (!hasPlots && messages.length > 0) {
+      showConsole.value = true
+    }
   }
 }
 
@@ -114,8 +122,15 @@ const handleExampleSelect = async (example: RExample) => {
         
         // Execute code after CSV is loaded
         if (example.code.trim()) {
+          clearMessages() // Clear console and charts before running
           await executeCode(example.code)
           lastExecutedCode.value = example.code
+          
+          // Auto-open console if no plots were generated
+          const hasPlots = messages.some(msg => msg.type === 'plot')
+          if (!hasPlots && messages.length > 0) {
+            showConsole.value = true
+          }
         }
       }
     } catch (error) {
@@ -124,8 +139,15 @@ const handleExampleSelect = async (example: RExample) => {
   } else {
     // Execute code immediately for examples without CSV
     if (example.code.trim()) {
+      clearMessages() // Clear console and charts before running
       await executeCode(example.code)
       lastExecutedCode.value = example.code
+      
+      // Auto-open console if no plots were generated
+      const hasPlots = messages.some(msg => msg.type === 'plot')
+      if (!hasPlots && messages.length > 0) {
+        showConsole.value = true
+      }
     }
   }
 }
