@@ -98,21 +98,62 @@ ggplot(gear_summary, aes(x = factor(gear), y = count, fill = transmission)) +
   theme(legend.position = "bottom")`,
   },
   {
+    id: 'startup-analysis',
+    title: 'Startup funding analysis',
+    description: 'Analyze startup funding data by sector and region',
+    csvUrl: '/startup_funding.csv',
+    code: `library(dplyr)
+library(ggplot2)
+library(scales)
+
+# Load the startup funding data
+data <- read.csv("/tmp/startup_funding.csv", stringsAsFactors = FALSE)
+
+# Check the data
+head(data)
+
+# Analyze funding by sector
+data %>%
+  group_by(sector) %>%
+  summarise(
+    total_funding = sum(funding_amount_usd),
+    avg_funding = mean(funding_amount_usd),
+    count = n()
+  ) %>%
+  arrange(desc(total_funding))
+
+# Create visualization
+ggplot(data, aes(x = reorder(sector, funding_amount_usd), 
+                 y = funding_amount_usd, fill = sector)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  scale_y_continuous(labels = label_dollar(scale = 1e-6, suffix = "M")) +
+  labs(title = "Startup Funding by Sector",
+       x = "Sector",
+       y = "Funding Amount (USD)",
+       caption = "Data: Sample startup funding by sector and valuation") +
+  theme_minimal()`,
+  },
+  {
     id: 'csv-example',
     title: 'Work with uploaded CSV',
-    description: 'Example showing CSV workflow with built-in data as placeholder',
+    description: 'Generic example for any uploaded CSV file',
     code: `library(dplyr)
 library(ggplot2)
 
-# This example uses built-in iris dataset as placeholder
-# After uploading CSV, replace 'iris' with 'data'
-dataset <- iris
+# After uploading your CSV file, load it like this:
+# data <- read.csv("/tmp/your_filename.csv", stringsAsFactors = FALSE)
+
+# For now, using built-in iris dataset as example
+data <- iris
 
 # Explore your data structure
-# str(dataset)  # Uncomment to see data structure
+str(data)
+head(data)
+# summary(data)  # Uncomment for basic statistics
 
 # Create a scatter plot
-ggplot(dataset, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+ggplot(data, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
   geom_point(size = 3, alpha = 0.7) +
   labs(title = "Sepal Dimensions by Species",
        x = "Sepal Length (cm)",
@@ -125,31 +166,46 @@ ggplot(dataset, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
     id: 'metal-bands-happiness',
     title: 'Metal bands vs happiness',
     description: 'Correlation between metal bands per capita and happiness score by country',
+    csvUrl: '/metal_bands_happiness.csv',
     code: `library(ggplot2)
 library(ggrepel)
 
-# Note: This example requires the metal_bands_happiness.csv file to be uploaded
-# For now, we'll create sample data to demonstrate the visualization
+# Load the data from the uploaded CSV file
+data <- read.csv("/tmp/metal_bands_happiness.csv", stringsAsFactors = FALSE)
 
-# Sample data (replace with real data when CSV is uploaded)
-df <- data.frame(
-  Country.or.region = c("Finland", "Sweden", "Norway", "Denmark", "Iceland", 
-                       "Switzerland", "Netherlands", "Canada", "New Zealand", "Austria",
-                       "Germany", "United Kingdom", "United States", "France", "Spain"),
-  Metal.bands.per.capita = c(630, 428, 309, 295, 340, 179, 158, 152, 143, 156,
-                           171, 147, 72, 89, 87),
-  Score = c(7.8, 7.6, 7.5, 7.5, 7.5, 7.5, 7.4, 7.2, 7.2, 7.2,
-           7.0, 6.9, 6.9, 6.6, 6.4)
-)
-
-ggplot(df, aes(x = Metal.bands.per.capita, y = Score, label = Country.or.region)) +
+# Create the visualization
+ggplot(data, aes(x = Metal.bands.per.capita, y = Score, label = Country.or.region)) +
   scale_x_log10() +
   stat_smooth(method = "lm", linewidth = 0.5, alpha = 0.2) +
-  geom_point(color = "red", size = 0.5) +
-  geom_text_repel(size = 3, point.size = 0.5, segment.alpha = 0.5, segment.color = "red") +
+  geom_point(color = "red", size = 0.8) +
+  geom_text_repel(size = 2.5, point.size = 0.5, segment.alpha = 0.5, segment.color = "red") +
   xlab("Metal bands per 1M people") +
   ylab("Average happiness score") +
-  labs(caption = "Data sources: Enc. Metallum (2016), after Jakub Marian; World Happiness Report (2022). Chart by Piotr Migdał, p.migdal.pl, CC-BY.") +
+  labs(title = "Metal Bands per Capita vs Happiness Score",
+       caption = "Data sources: Enc. Metallum (2016), after Jakub Marian; World Happiness Report (2022). Chart by Piotr Migdał, p.migdal.pl, CC-BY.") +
   theme_minimal()`,
+  },
+  {
+    id: 'global-temperature',
+    title: 'Global temperature trends',
+    description: 'Analyze global temperature and CO2 trends over time',
+    csvUrl: '/global_temperature.csv',
+    code: `library(ggplot2)
+library(dplyr)
+
+# Load the global temperature data
+data <- read.csv("/tmp/global_temperature.csv", stringsAsFactors = FALSE)
+
+# Create temperature trend visualization
+ggplot(data, aes(x = year)) +
+  geom_line(aes(y = temperature_celsius), color = "#e74c3c", size = 1.5) +
+  geom_point(aes(y = temperature_celsius), color = "#c0392b", size = 2) +
+  geom_smooth(aes(y = temperature_celsius), method = "loess", se = TRUE, color = "#e74c3c", alpha = 0.2) +
+  labs(title = "Global Temperature Trend (2000-2020)",
+       x = "Year",
+       y = "Temperature (°C)",
+       caption = "Data: Global temperature measurements") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))`,
   },
 ]

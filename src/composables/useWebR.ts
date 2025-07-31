@@ -140,28 +140,17 @@ export const useWebR = () => {
     }
 
     try {
-      isLoading.value = true
-      
-      // Create a temporary file in WebR's filesystem
+      // Write the CSV content as a UTF-8 encoded file
       const fileName = csvData.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-      await webR.FS.writeFile(`/tmp/${fileName}`, csvData.content)
+      const encoder = new TextEncoder()
+      const csvBytes = encoder.encode(csvData.content)
+      await webR.FS.writeFile(`/tmp/${fileName}`, csvBytes)
       
-      // Read the CSV into R
-      const readCode = `
-        data <- read.csv("/tmp/${fileName}", stringsAsFactors = FALSE)
-        cat("CSV file '${csvData.name}' loaded successfully\\n")
-        cat("Dimensions:", nrow(data), "rows,", ncol(data), "columns\\n")
-        cat("Column names:", paste(names(data), collapse = ", "), "\\n")
-        head(data)
-      `
-      
-      await executeCode(readCode)
+      addMessage('success', `CSV file '${fileName}' uploaded to /tmp/${fileName}`)
       
     } catch (error) {
       console.error('CSV upload error:', error)
       addMessage('error', `Failed to upload CSV: ${error}`)
-    } finally {
-      isLoading.value = false
     }
   }
 

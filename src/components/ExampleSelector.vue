@@ -57,6 +57,7 @@ const handleExampleChange = () => {
   border-color: #9ca3af;
 }
 
+
 .select:focus {
   outline: none;
   border-color: #3b82f6;

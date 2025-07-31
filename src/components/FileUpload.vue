@@ -2,16 +2,21 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import type { CsvData } from '@/types'
 
+const props = defineProps<{
+  uploadedFile?: CsvData | null
+}>()
+
 const emit = defineEmits<{
   fileUploaded: [data: CsvData]
   fileRemoved: []
 }>()
 
 const fileInputRef = ref<HTMLInputElement>()
-const uploadedFile = ref<CsvData | null>(null)
 const isOpen = ref(false)
 const isDragging = ref(false)
 const dropdownRef = ref<HTMLElement>()
+const showUrlInput = ref(false)
+const urlInput = ref('')
 
 const parseCsvInfo = (content: string): { rows: number; columns: number; columnNames: string[] } => {
   const lines = content.trim().split('\n')
@@ -69,15 +74,45 @@ const processFile = (file: File) => {
       columns,
       columnNames
     }
-    uploadedFile.value = csvData
     emit('fileUploaded', csvData)
   }
   reader.readAsText(file)
 }
 
+const loadFromUrl = async () => {
+  if (!urlInput.value.trim()) {
+    return
+  }
+  
+  try {
+    const response = await fetch(urlInput.value)
+    if (!response.ok) {
+      alert('Failed to load CSV from URL')
+      return
+    }
+    
+    const content = await response.text()
+    const { rows, columns, columnNames } = parseCsvInfo(content)
+    const csvData: CsvData = {
+      name: urlInput.value.split('/').pop() || 'data.csv',
+      content,
+      rows,
+      columns,
+      columnNames
+    }
+    showUrlInput.value = false
+    urlInput.value = ''
+    emit('fileUploaded', csvData)
+  } catch (error) {
+    console.error('Error loading CSV from URL:', error)
+    alert('Error loading CSV from URL')
+  }
+}
+
 const removeFile = () => {
-  uploadedFile.value = null
   isOpen.value = false
+  showUrlInput.value = false
+  urlInput.value = ''
   if (fileInputRef.value) {
     fileInputRef.value.value = ''
   }
@@ -85,7 +120,7 @@ const removeFile = () => {
 }
 
 const toggleDropdown = () => {
-  if (uploadedFile.value) {
+  if (props.uploadedFile) {
     isOpen.value = !isOpen.value
   }
 }
@@ -107,26 +142,47 @@ onUnmounted(() => {
 
 <template>
   <div ref="dropdownRef" class="file-upload">
-    <div 
-      v-if="!uploadedFile" 
-      class="upload-button"
-      :class="{ 'dragging': isDragging }"
-      @click="fileInputRef?.click()"
-      @drop="handleDrop"
-      @dragover="handleDragOver"
-      @dragleave="handleDragLeave"
-    >
-      <input
-        ref="fileInputRef"
-        type="file"
-        accept=".csv"
-        class="file-input"
-        style="display: none;"
-        @change="handleFileSelect"
+    <div v-if="!props.uploadedFile && !showUrlInput" class="upload-controls">
+      <div 
+        class="upload-button"
+        :class="{ 'dragging': isDragging }"
+        @click="fileInputRef?.click()"
+        @drop="handleDrop"
+        @dragover="handleDragOver"
+        @dragleave="handleDragLeave"
+      >
+        <input
+          ref="fileInputRef"
+          type="file"
+          accept=".csv"
+          class="file-input"
+          style="display: none;"
+          @change="handleFileSelect"
+        />
+        <span class="upload-icon">📁</span>
+        <span class="upload-text">Upload CSV</span>
+        <span class="drag-hint">or drop file here</span>
+      </div>
+      
+      <button 
+        class="url-toggle-btn" 
+        @click="showUrlInput = true"
+      >
+        🌐 Load from URL
+      </button>
+    </div>
+
+    <!-- URL Input Section (when active) -->
+    <div v-else-if="!props.uploadedFile && showUrlInput" class="url-input-section">
+      <input 
+        v-model="urlInput"
+        type="url"
+        placeholder="Enter CSV URL (e.g., https://example.com/data.csv)"
+        class="url-input"
+        @keyup.enter="loadFromUrl"
       />
-      <span class="upload-icon">📁</span>
-      <span class="upload-text">Upload CSV</span>
-      <span class="drag-hint">or drop file here</span>
+      <button class="url-load-btn" @click="loadFromUrl">Load</button>
+      <button class="url-cancel-btn" @click="showUrlInput = false">Cancel</button>
     </div>
     
     <div v-else class="csv-info-container">
@@ -135,7 +191,9 @@ onUnmounted(() => {
         @click="toggleDropdown"
       >
         <span class="csv-icon">📊</span>
-        <span class="csv-text">{{ uploadedFile.name }} ({{ uploadedFile.rows }} × {{ uploadedFile.columns }})</span>
+        <span class="csv-text">
+          {{ props.uploadedFile.name }} ({{ props.uploadedFile.rows }} × {{ props.uploadedFile.columns }})
+        </span>
         <span class="dropdown-arrow" :class="{ 'open': isOpen }">▼</span>
       </button>
       
@@ -147,21 +205,21 @@ onUnmounted(() => {
         <div class="csv-details">
           <div class="detail-item">
             <span class="detail-label">File:</span>
-            <span class="detail-value">{{ uploadedFile.name }}</span>
+            <span class="detail-value">{{ props.uploadedFile.name }}</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Rows:</span>
-            <span class="detail-value">{{ uploadedFile.rows.toLocaleString() }}</span>
+            <span class="detail-value">{{ props.uploadedFile.rows.toLocaleString() }}</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Columns:</span>
-            <span class="detail-value">{{ uploadedFile.columns }}</span>
+            <span class="detail-value">{{ props.uploadedFile.columns }}</span>
           </div>
           <div class="columns-section">
             <span class="columns-header">Column Names:</span>
             <div class="columns-list">
               <span 
-                v-for="(col, index) in uploadedFile.columnNames" 
+                v-for="(col, index) in props.uploadedFile.columnNames" 
                 :key="index"
                 class="column-name"
               >
@@ -180,6 +238,12 @@ onUnmounted(() => {
   position: relative;
   display: flex;
   align-items: center;
+}
+
+.upload-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .upload-button {
@@ -219,6 +283,78 @@ onUnmounted(() => {
   font-size: 0.75rem;
   color: #6b7280;
   margin-left: 0.25rem;
+}
+
+.url-toggle-btn {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-self: flex-start;
+}
+
+.url-toggle-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.url-input-section {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  background: #f8fafc;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+.url-input {
+  flex: 1;
+  padding: 0.375rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  min-width: 200px;
+}
+
+.url-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+.url-load-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.375rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.url-load-btn:hover {
+  background: #2563eb;
+}
+
+.url-cancel-btn {
+  background: #6b7280;
+  color: white;
+  border: none;
+  padding: 0.375rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.url-cancel-btn:hover {
+  background: #4b5563;
 }
 
 .csv-info-container {

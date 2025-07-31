@@ -30,6 +30,9 @@ const hasChanges = computed(() => code.value !== lastExecutedCode.value)
 // GitHub stars
 const githubStars = ref<number | null>(null)
 
+// Current CSV data state
+const currentCsvData = ref<CsvData | null>(null)
+
 const {
   isReady,
   isLoading,
@@ -61,20 +64,69 @@ const runCode = async () => {
 }
 
 const handleFileUpload = async (csvData: CsvData) => {
+  currentCsvData.value = csvData
   await uploadCsvData(csvData)
 }
 
 const handleFileRemoved = () => {
+  currentCsvData.value = null
   // Clear any data-related variables in R
   void executeCode('if (exists("data")) rm(data)')
 }
 
 const handleExampleSelect = async (example: RExample) => {
   code.value = example.code
-  // Auto-execute the selected example
-  if (isReady.value && example.code.trim()) {
-    await executeCode(example.code)
-    lastExecutedCode.value = example.code
+  
+  // Wait for WebR to be ready before loading CSV
+  if (!isReady.value) {
+    console.log('WebR not ready yet, waiting...')
+    return
+  }
+  
+  // Load CSV data if the example specifies a csvUrl
+  if (example.csvUrl) {
+    try {
+      const response = await fetch(example.csvUrl)
+      if (response.ok) {
+        const csvContent = await response.text()
+        const parseCsvInfo = (content: string) => {
+          const lines = content.trim().split('\n')
+          const columnNames = lines[0].split(',').map(name => name.trim().replace(/^"|"$/g, ''))
+          return {
+            rows: lines.length - 1,
+            columns: columnNames.length,
+            columnNames
+          }
+        }
+        
+        const { rows, columns, columnNames } = parseCsvInfo(csvContent)
+        const csvData = {
+          name: example.csvUrl.split('/').pop() || 'data.csv',
+          content: csvContent,
+          rows,
+          columns,
+          columnNames
+        }
+        
+        // Upload the CSV data (this will load it into R as 'data')
+        currentCsvData.value = csvData
+        await uploadCsvData(csvData)
+        
+        // Execute code after CSV is loaded
+        if (example.code.trim()) {
+          await executeCode(example.code)
+          lastExecutedCode.value = example.code
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load CSV for example:', error)
+    }
+  } else {
+    // Execute code immediately for examples without CSV
+    if (example.code.trim()) {
+      await executeCode(example.code)
+      lastExecutedCode.value = example.code
+    }
   }
 }
 
@@ -92,11 +144,8 @@ const fetchGitHubStars = async () => {
 }
 
 onMounted(() => {
-  void initializeWebR(code.value)
-  // Set initial executed code after auto-execution
-  setTimeout(() => {
-    lastExecutedCode.value = code.value
-  }, 100)
+  // Initialize WebR without auto-executing the initial code
+  void initializeWebR('')
   // Fetch GitHub stars
   void fetchGitHubStars()
 })
@@ -133,7 +182,11 @@ onMounted(() => {
     <main class="main">
       <div class="toolbar">
         <div class="toolbar-left">
-          <FileUpload @file-uploaded="handleFileUpload" @file-removed="handleFileRemoved" />
+          <FileUpload 
+            :uploaded-file="currentCsvData"
+            @file-uploaded="handleFileUpload" 
+            @file-removed="handleFileRemoved" 
+          />
           <ExampleSelector @example-selected="handleExampleSelect" />
         </div>
         <div class="toolbar-right">

@@ -3,6 +3,7 @@ export interface RExample {
   title: string
   description: string
   code: string
+  csvUrl?: string // Optional URL to load CSV data
 }
 
 export interface WebRMessage {
