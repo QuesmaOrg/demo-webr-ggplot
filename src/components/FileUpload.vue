@@ -142,15 +142,29 @@ onUnmounted(() => {
 
 <template>
   <div ref="dropdownRef" class="file-upload">
-    <div v-if="!props.uploadedFile && !showUrlInput" class="upload-controls">
-      <div 
-        class="upload-button"
-        :class="{ 'dragging': isDragging }"
-        @click="fileInputRef?.click()"
-        @drop="handleDrop"
-        @dragover="handleDragOver"
-        @dragleave="handleDragLeave"
-      >
+    <div
+      v-if="!props.uploadedFile" class="csv-drop-zone" 
+      :class="{ 'dragging': isDragging }"
+      @drop="handleDrop"
+      @dragover="handleDragOver"
+      @dragleave="handleDragLeave"
+    >
+      
+      <!-- URL Input Section (when active) -->
+      <div v-if="showUrlInput" class="url-input-section">
+        <input 
+          v-model="urlInput"
+          type="url"
+          placeholder="Enter CSV URL (e.g., https://example.com/data.csv)"
+          class="url-input"
+          @keyup.enter="loadFromUrl"
+        />
+        <button class="thin-btn primary" @click="loadFromUrl">Load</button>
+        <button class="thin-btn" @click="showUrlInput = false">Cancel</button>
+      </div>
+      
+      <!-- Default CSV upload options -->
+      <div v-else class="csv-options">
         <input
           ref="fileInputRef"
           type="file"
@@ -159,30 +173,14 @@ onUnmounted(() => {
           style="display: none;"
           @change="handleFileSelect"
         />
-        <span class="upload-icon">📁</span>
-        <span class="upload-text">Upload CSV</span>
-        <span class="drag-hint">or drop file here</span>
+        <span class="drop-text">Drop CSV here</span>
+        <button class="thin-btn" @click="fileInputRef?.click()">
+          or upload file
+        </button>
+        <button class="thin-btn" @click="showUrlInput = true">
+          or load from URL
+        </button>
       </div>
-      
-      <button 
-        class="url-toggle-btn" 
-        @click="showUrlInput = true"
-      >
-        🌐 Load from URL
-      </button>
-    </div>
-
-    <!-- URL Input Section (when active) -->
-    <div v-else-if="!props.uploadedFile && showUrlInput" class="url-input-section">
-      <input 
-        v-model="urlInput"
-        type="url"
-        placeholder="Enter CSV URL (e.g., https://example.com/data.csv)"
-        class="url-input"
-        @keyup.enter="loadFromUrl"
-      />
-      <button class="url-load-btn" @click="loadFromUrl">Load</button>
-      <button class="url-cancel-btn" @click="showUrlInput = false">Cancel</button>
     </div>
     
     <div v-else class="csv-info-container">
@@ -190,7 +188,6 @@ onUnmounted(() => {
         class="csv-button"
         @click="toggleDropdown"
       >
-        <span class="csv-icon">📊</span>
         <span class="csv-text">
           {{ props.uploadedFile.name }} ({{ props.uploadedFile.rows }} × {{ props.uploadedFile.columns }})
         </span>
@@ -240,76 +237,75 @@ onUnmounted(() => {
   align-items: center;
 }
 
-.upload-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.upload-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: #f3f4f6;
+.csv-drop-zone {
+  background: #fafafa;
   border: 2px dashed #d1d5db;
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  cursor: pointer;
   transition: all 0.3s ease;
-  white-space: nowrap;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.upload-button:hover {
-  background: #e5e7eb;
+.csv-drop-zone:hover {
+  background: #f3f4f6;
   border-color: #9ca3af;
 }
 
-.upload-button.dragging {
+.csv-drop-zone.dragging {
   background: #dbeafe;
   border-color: #3b82f6;
   border-style: solid;
 }
 
-.upload-icon {
+.csv-options {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
   font-size: 0.875rem;
 }
 
-.upload-text {
-  font-weight: 500;
+.drop-text {
+  color: #000000;
+  font-size: 0.875rem;
+  margin-right: 0.25rem;
 }
 
-.drag-hint {
-  font-size: 0.75rem;
-  color: #6b7280;
-  margin-left: 0.25rem;
-}
-
-.url-toggle-btn {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+.thin-btn {
+  background: none;
+  border: 1px solid #d1d5db;
   border-radius: 4px;
-  padding: 0.375rem 0.75rem;
+  padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
-  color: #475569;
+  color: #3b82f6;
   cursor: pointer;
   transition: all 0.2s ease;
-  align-self: flex-start;
+  white-space: nowrap;
 }
 
-.url-toggle-btn:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+.thin-btn:hover {
+  background: #f3f4f6;
+  border-color: #3b82f6;
+}
+
+.thin-btn.primary {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.thin-btn.primary:hover {
+  background: #2563eb;
+  border-color: #2563eb;
 }
 
 .url-input-section {
   display: flex;
   gap: 0.5rem;
   align-items: center;
-  background: #f8fafc;
-  padding: 0.5rem;
-  border-radius: 4px;
-  border: 1px solid #e2e8f0;
+  width: 100%;
 }
 
 .url-input {
@@ -327,35 +323,6 @@ onUnmounted(() => {
   box-shadow: 0 0 0 1px #3b82f6;
 }
 
-.url-load-btn {
-  background: #3b82f6;
-  color: white;
-  border: none;
-  padding: 0.375rem 0.75rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.url-load-btn:hover {
-  background: #2563eb;
-}
-
-.url-cancel-btn {
-  background: #6b7280;
-  color: white;
-  border: none;
-  padding: 0.375rem 0.75rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.url-cancel-btn:hover {
-  background: #4b5563;
-}
 
 .csv-info-container {
   position: relative;
@@ -380,9 +347,6 @@ onUnmounted(() => {
   border-color: #9ca3af;
 }
 
-.csv-icon {
-  font-size: 0.875rem;
-}
 
 .csv-text {
   font-weight: 500;
