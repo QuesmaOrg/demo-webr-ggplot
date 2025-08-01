@@ -3,6 +3,7 @@ interface Props {
   isReady: boolean
   isLoading: boolean
   loadingStatus: string
+  webrVersion?: string
 }
 
 defineProps<Props>()
@@ -22,7 +23,9 @@ defineProps<Props>()
       <span v-else-if="isReady" class="status-icon">✓</span>
       <span v-else-if="loadingStatus.includes('Failed')" class="status-icon">✗</span>
       <span v-else class="status-icon">⚙️</span>
-      <span class="status-text">{{ loadingStatus || 'WebR' }}</span>
+      <span class="status-text">
+        {{ isReady && webrVersion ? `WebR ${webrVersion} Ready` : loadingStatus || 'WebR' }}
+      </span>
     </div>
   </div>
 </template>

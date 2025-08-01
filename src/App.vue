@@ -235,6 +235,7 @@ onMounted(async () => {
             :is-ready="isReady" 
             :is-loading="isInitializing" 
             :loading-status="loadingStatus"
+            :webr-version="webrVersion"
           />
           <LibrarySelector 
             :installed-libraries="installedLibraries" 
@@ -293,10 +294,8 @@ onMounted(async () => {
           >
             {{ !isReady ? 'Waiting for WebR...' : isLoading ? 'Running...' : 'Run Code' }}
           </button>
-          <div v-if="isReady && (webrVersion || rVersion)" class="runtime-versions">
-            <span v-if="webrVersion">WebR {{ webrVersion }}</span>
-            <span v-if="webrVersion && rVersion"> | </span>
-            <span v-if="rVersion">{{ rVersion }}</span>
+          <div v-if="isReady && rVersion" class="runtime-versions">
+            <span>{{ rVersion }}</span>
           </div>
         </div>
         <div class="bottom-bar-right">
