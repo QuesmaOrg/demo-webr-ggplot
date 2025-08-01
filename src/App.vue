@@ -39,6 +39,9 @@ const {
   loadingStatus,
   installedLibraries,
   messages,
+  packageVersions,
+  webrVersion,
+  rVersion,
   initializeWebR,
   executeCode,
   uploadCsvData,
@@ -225,11 +228,12 @@ onMounted(async () => {
           <WebRStatus 
             :is-ready="isReady" 
             :is-loading="isLoading" 
-            :loading-status="loadingStatus" 
+            :loading-status="loadingStatus"
           />
           <LibrarySelector 
             :installed-libraries="installedLibraries" 
             :is-loading="isLoading"
+            :package-versions="packageVersions"
             @toggle-library="toggleLibrary"
           />
         </div>
@@ -283,6 +287,11 @@ onMounted(async () => {
           >
             {{ isLoading ? 'Running...' : 'Run Code' }}
           </button>
+          <div v-if="isReady && (webrVersion || rVersion)" class="runtime-versions">
+            <span v-if="webrVersion">WebR {{ webrVersion }}</span>
+            <span v-if="webrVersion && rVersion"> | </span>
+            <span v-if="rVersion">{{ rVersion }}</span>
+          </div>
         </div>
         <div class="bottom-bar-right">
           <button 
@@ -597,6 +606,19 @@ onMounted(async () => {
 .bottom-bar-left {
   display: flex;
   align-items: center;
+  gap: 1rem;
+}
+
+.runtime-versions {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-family: monospace;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.runtime-versions:hover {
+  opacity: 1;
 }
 
 .bottom-bar-right {

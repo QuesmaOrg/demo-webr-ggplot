@@ -4,6 +4,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 interface Props {
   installedLibraries: Set<string>
   isLoading: boolean
+  packageVersions: Record<string, string>
 }
 
 const props = defineProps<Props>()
@@ -87,7 +88,12 @@ onUnmounted(() => {
             @change="handleToggle(library.name, $event)"
           />
           <div class="library-info">
-            <span class="library-name">{{ library.name }}</span>
+            <div class="library-name-row">
+              <span class="library-name">{{ library.name }}</span>
+              <span
+v-if="installedLibraries.has(library.name) && packageVersions[library.name]" 
+                    class="library-version">{{ packageVersions[library.name] }}</span>
+            </div>
             <span class="library-desc">{{ library.description }}</span>
           </div>
         </label>
@@ -202,10 +208,24 @@ onUnmounted(() => {
   gap: 0.25rem;
 }
 
+.library-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
 .library-name {
   font-size: 0.875rem;
   font-weight: 500;
   color: #374151;
+}
+
+.library-version {
+  font-size: 0.75rem;
+  color: #059669;
+  font-family: monospace;
+  font-weight: 500;
 }
 
 .library-desc {

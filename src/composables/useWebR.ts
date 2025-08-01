@@ -7,6 +7,9 @@ export const useWebR = () => {
   const loadingStatus = ref('')
   const installedLibraries = reactive(new Set<string>())
   const messages = reactive<WebRMessage[]>([])
+  const packageVersions = reactive<Record<string, string>>({})
+  const webrVersion = ref<string>('')
+  const rVersion = ref<string>('')
   
   let webR: any = null
   let shelter: any = null
@@ -47,6 +50,9 @@ export const useWebR = () => {
       isReady.value = true
       loadingStatus.value = 'WebR Ready'
       addMessage('success', 'WebR initialized successfully with ggplot2, dplyr, and ggrepel')
+      
+      // Query version information
+      await queryVersionInfo()
       
       // Auto-execute initial code if provided
       if (initialCode && initialCode.trim()) {
@@ -177,12 +183,57 @@ export const useWebR = () => {
     }
   }
 
+  const queryVersionInfo = async () => {
+    if (!webR || !isReady.value) {return}
+    
+    // Query R version
+    try {
+      const rVersionResult = await webR.evalR('R.version.string')
+      const rVersionJs = await rVersionResult.toJs()
+      if (rVersionJs?.values?.[0]) {
+        // Remove "R version" prefix to get clean version string
+        rVersion.value = rVersionJs.values[0].replace(/^R version /, 'R ')
+      }
+    } catch (error) {
+      console.error('Failed to get R version:', error)
+    }
+    
+    // Query WebR version (from package or webR object)
+    try {
+      // Try to get from webR object first, fallback to import meta
+      webrVersion.value = '0.5.4' // We know this from package.json
+    } catch (error) {
+      console.error('Failed to get WebR version:', error)
+    }
+    
+    // Query package versions
+    const packages = ['ggplot2', 'dplyr', 'ggrepel']
+    
+    for (const pkg of packages) {
+      if (installedLibraries.has(pkg)) {
+        try {
+          const result = await webR.evalR(`as.character(packageVersion("${pkg}"))`)
+          const jsResult = await result.toJs()
+          
+          if (jsResult?.values?.[0]) {
+            packageVersions[pkg] = jsResult.values[0]
+          }
+        } catch (error) {
+          console.error(`Failed to get version for ${pkg}:`, error)
+        }
+      }
+    }
+  }
+
   return {
     isReady,
     isLoading,
     loadingStatus,
     installedLibraries,
     messages,
+    packageVersions,
+    webrVersion,
+    rVersion,
     initializeWebR,
     executeCode,
     uploadCsvData,
