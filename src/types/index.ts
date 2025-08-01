@@ -7,7 +7,7 @@ export interface RExample {
 }
 
 export interface WebRMessage {
-  type: 'stdout' | 'stderr' | 'error' | 'success' | 'info' | 'plot'
+  type: 'stdout' | 'stderr' | 'error' | 'success' | 'info' | 'warning' | 'plot'
   content: string
 }
 
@@ -17,4 +17,32 @@ export interface CsvData {
   rows: number
   columns: number
   columnNames: string[]
+}
+
+// WebR output types
+export interface WebRCharacterObject {
+  type: 'character'
+  names: string[] | null
+  values: string[]
+}
+
+export interface WebRListObject {
+  type: 'list'
+  names: string[]
+  values: WebRCharacterObject[]
+}
+
+export interface WebRProxy {
+  toJs(): Promise<WebRCharacterObject | WebRListObject>
+}
+
+export interface WebROutputItem {
+  type: 'stdout' | 'stderr' | 'message' | 'warning' | 'error'
+  data: string | WebRProxy
+}
+
+export interface WebRExecutionResult {
+  output?: WebROutputItem[]
+  images?: HTMLImageElement[]
+  result?: unknown
 }

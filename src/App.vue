@@ -60,6 +60,10 @@ const hasErrors = computed(() => {
   return textMessages.value.some(msg => msg.type === 'error' || msg.type === 'stderr')
 })
 
+const hasWarnings = computed(() => {
+  return textMessages.value.some(msg => msg.type === 'warning')
+})
+
 const runCode = async () => {
   if (code.value.trim()) {
     clearMessages() // Clear console and charts before running
@@ -295,9 +299,8 @@ onMounted(async () => {
         </div>
         <div class="bottom-bar-right">
           <button 
-            v-if="textMessages.length > 0"
             class="console-toggle"
-            :class="{ 'has-errors': hasErrors }"
+            :class="{ 'has-errors': hasErrors, 'has-warnings': hasWarnings && !hasErrors }"
             @click="showConsole = !showConsole"
           >
             Console ({{ textMessages.length }})
@@ -582,6 +585,10 @@ onMounted(async () => {
   color: #2563eb;
 }
 
+.console-message.warning .message-label {
+  color: #d97706;
+}
+
 .message-text {
   flex: 1;
   margin: 0;
@@ -649,6 +656,12 @@ onMounted(async () => {
   background: #fef2f2;
   border-color: #fecaca;
   color: #dc2626;
+}
+
+.console-toggle.has-warnings {
+  background: #fefbf2;
+  border-color: #fed7aa;
+  color: #d97706;
 }
 
 .toggle-arrow {

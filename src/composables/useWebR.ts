@@ -1,5 +1,60 @@
 import { ref, reactive } from 'vue'
-import type { WebRMessage, CsvData } from '@/types'
+import type { WebRMessage, CsvData, WebROutputItem, WebRCharacterObject, WebRListObject, WebRProxy, WebRExecutionResult } from '@/types'
+
+// WebR output type mapping - immutable and reusable
+const WEBR_TYPE_MAP = {
+  stdout: 'stdout',
+  stderr: 'stderr', 
+  message: 'info',
+  warning: 'warning',
+  error: 'error'
+} as const satisfies Record<string, WebRMessage['type']>
+
+// Type guards for WebR objects
+const isWebRCharacterObject = (obj: unknown): obj is WebRCharacterObject => {
+  return typeof obj === 'object' && obj !== null && 
+         'type' in obj && obj.type === 'character' &&
+         'values' in obj && Array.isArray(obj.values)
+}
+
+const isWebRListObject = (obj: unknown): obj is WebRListObject => {
+  return typeof obj === 'object' && obj !== null && 
+         'type' in obj && obj.type === 'list' &&
+         'values' in obj && Array.isArray(obj.values)
+}
+
+// Extract content from WebR output with proper type checking
+const extractContentFromWebROutput = async (output: WebROutputItem): Promise<string> => {
+  if (typeof output.data === 'string') {
+    return output.data
+  }
+
+  // Convert WebR proxy to JavaScript object
+  const proxy = output.data as WebRProxy
+  const jsResult = await proxy.toJs()
+  
+  if (isWebRCharacterObject(jsResult)) {
+    return jsResult.values.join('\n')
+  }
+  
+  if (isWebRListObject(jsResult)) {
+    // Validate assumption: we expect only 1 message in the list
+    if (jsResult.values.length > 1) {
+      console.error(`ASSUMPTION VIOLATION: List has ${jsResult.values.length} values, expected 1:`, jsResult)
+    }
+    
+    const messageObject = jsResult.values[0]
+    if (isWebRCharacterObject(messageObject) && messageObject.values.length > 0) {
+      return messageObject.values.join('\n')
+    }
+    
+    console.error('Unexpected list structure:', jsResult)
+    return '[Unable to extract message from list]'
+  }
+  
+  console.error('Unknown WebR object type:', jsResult)
+  return `[Unknown WebR type: ${(jsResult as any)?.type || 'unknown'}]`
+}
 
 export const useWebR = () => {
   const isReady = ref(false)
@@ -88,19 +143,25 @@ export const useWebR = () => {
       const result = await shelter.captureR(code, {
         withAutoprint: true,
         captureStreams: true,
-        captureConditions: false,
+        captureConditions: true,
         captureGraphics: true,
         env: webR.objs.globalEnv,
       })
 
-      // Process stdout
-      if (result.output && result.output.length > 0) {
-        for (const output of result.output) {
-          if (output.type === 'stdout' && output.data) {
-            addMessage('stdout', output.data)
-          } else if (output.type === 'stderr' && output.data) {
-            addMessage('stderr', output.data)
+      // Process all output (streams and conditions)
+      const typedResult = result as WebRExecutionResult
+      if (typedResult.output && typedResult.output.length > 0) {
+        for (const output of typedResult.output) {
+          const content = await extractContentFromWebROutput(output)
+          const messageType = WEBR_TYPE_MAP[output.type as keyof typeof WEBR_TYPE_MAP]
+          
+          if (!messageType) {
+            console.error(`Unknown WebR output type: ${output.type}`)
+            addMessage('error', `Unknown output type: ${output.type}`)
+            continue
           }
+          
+          addMessage(messageType, content)
         }
       }
 
