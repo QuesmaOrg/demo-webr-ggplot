@@ -47,11 +47,6 @@ watch(
 <template>
   <div class="output-display">
     <div ref="outputRef" class="output-content">
-      <div v-if="isLoading" class="loading">
-        <div class="spinner"></div>
-        <span>Running R code...</span>
-      </div>
-      
       <div v-if="messages.length === 0 && !isLoading" class="empty-state">
         <p>Run some R code to see the output here</p>
       </div>
@@ -65,6 +60,14 @@ watch(
           @load="handlePlotLoad"
           @error="handlePlotError"
         />
+      </div>
+      
+      <!-- Loading overlay -->
+      <div v-if="isLoading" class="loading-overlay">
+        <div class="loading-content">
+          <div class="spinner"></div>
+          <span>Executing R code...</span>
+        </div>
       </div>
     </div>
   </div>
@@ -85,19 +88,39 @@ watch(
   display: flex;
   flex-direction: column;
   min-height: 0;
+  position: relative;
 }
 
-.loading {
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.4);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: #6b7280;
-  font-style: italic;
+  justify-content: center;
+  z-index: 10;
+  backdrop-filter: blur(1px);
+}
+
+.loading-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #374151;
+  font-weight: 500;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
 .spinner {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   border: 2px solid #e5e7eb;
   border-top: 2px solid #3b82f6;
   border-radius: 50%;

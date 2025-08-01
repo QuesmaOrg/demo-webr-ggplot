@@ -58,7 +58,8 @@ const extractContentFromWebROutput = async (output: WebROutputItem): Promise<str
 
 export const useWebR = () => {
   const isReady = ref(false)
-  const isLoading = ref(false)
+  const isLoading = ref(false) // For code execution
+  const isInitializing = ref(false) // For WebR initialization
   const loadingStatus = ref('')
   const installedLibraries = reactive(new Set<string>())
   const messages = reactive<WebRMessage[]>([])
@@ -71,7 +72,7 @@ export const useWebR = () => {
 
   const initializeWebR = async (initialCode?: string) => {
     try {
-      isLoading.value = true
+      isInitializing.value = true
       loadingStatus.value = 'Initializing WebR...'
       
       // Import WebR from installed package
@@ -118,7 +119,7 @@ export const useWebR = () => {
       loadingStatus.value = 'WebR Failed'
       addMessage('error', `Failed to initialize WebR: ${error}`)
     } finally {
-      isLoading.value = false
+      isInitializing.value = false
     }
   }
 
@@ -128,6 +129,15 @@ export const useWebR = () => {
 
   const clearMessages = () => {
     messages.splice(0, messages.length)
+  }
+
+  const clearConsoleMessages = () => {
+    // Remove only non-plot messages, keep charts visible during execution
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].type !== 'plot') {
+        messages.splice(i, 1)
+      }
+    }
   }
 
   const executeCode = async (code: string) => {
@@ -227,7 +237,7 @@ export const useWebR = () => {
     try {
       if (install) {
         loadingStatus.value = `Installing ${library}...`
-        isLoading.value = true
+        isInitializing.value = true
         await webR.installPackages([library])
         installedLibraries.add(library)
         addMessage('success', `${library} installed successfully`)
@@ -239,7 +249,7 @@ export const useWebR = () => {
     } catch (error) {
       addMessage('error', `Failed to install ${library}: ${error}`)
     } finally {
-      isLoading.value = false
+      isInitializing.value = false
       loadingStatus.value = isReady.value ? 'WebR Ready' : loadingStatus.value
     }
   }
@@ -289,6 +299,7 @@ export const useWebR = () => {
   return {
     isReady,
     isLoading,
+    isInitializing,
     loadingStatus,
     installedLibraries,
     messages,
@@ -299,6 +310,7 @@ export const useWebR = () => {
     executeCode,
     uploadCsvData,
     clearMessages,
+    clearConsoleMessages,
     toggleLibrary,
   }
 }

@@ -36,6 +36,7 @@ const currentCsvData = ref<CsvData | null>(null)
 const {
   isReady,
   isLoading,
+  isInitializing,
   loadingStatus,
   installedLibraries,
   messages,
@@ -46,6 +47,7 @@ const {
   executeCode,
   uploadCsvData,
   clearMessages,
+  clearConsoleMessages,
   toggleLibrary,
 } = useWebR()
 
@@ -66,7 +68,7 @@ const hasWarnings = computed(() => {
 
 const runCode = async () => {
   if (code.value.trim()) {
-    clearMessages() // Clear console and charts before running
+    clearConsoleMessages() // Clear console messages but keep charts visible
     await executeCode(code.value)
     lastExecutedCode.value = code.value
     
@@ -129,7 +131,7 @@ const handleExampleSelect = async (example: RExample) => {
         
         // Execute code after CSV is loaded
         if (example.code.trim()) {
-          clearMessages() // Clear console and charts before running
+          clearConsoleMessages() // Clear console messages but keep charts visible
           await executeCode(example.code)
           lastExecutedCode.value = example.code
           
@@ -151,7 +153,7 @@ const handleExampleSelect = async (example: RExample) => {
     
     // Execute code immediately for examples without CSV
     if (example.code.trim()) {
-      clearMessages() // Clear console and charts before running
+      clearConsoleMessages() // Clear console messages but keep charts visible
       await executeCode(example.code)
       lastExecutedCode.value = example.code
       
@@ -231,12 +233,12 @@ onMounted(async () => {
         <div class="toolbar-right">
           <WebRStatus 
             :is-ready="isReady" 
-            :is-loading="isLoading" 
+            :is-loading="isInitializing" 
             :loading-status="loadingStatus"
           />
           <LibrarySelector 
             :installed-libraries="installedLibraries" 
-            :is-loading="isLoading"
+            :is-loading="isInitializing"
             :package-versions="packageVersions"
             @toggle-library="toggleLibrary"
           />
@@ -289,7 +291,7 @@ onMounted(async () => {
             class="run-button"
             @click="runCode"
           >
-            {{ isLoading ? 'Running...' : 'Run Code' }}
+            {{ !isReady ? 'Waiting for WebR...' : isLoading ? 'Running...' : 'Run Code' }}
           </button>
           <div v-if="isReady && (webrVersion || rVersion)" class="runtime-versions">
             <span v-if="webrVersion">WebR {{ webrVersion }}</span>
