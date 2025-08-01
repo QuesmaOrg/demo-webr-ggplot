@@ -7,7 +7,8 @@ const emit = defineEmits<{
   exampleSelected: [example: RExample]
 }>()
 
-const selectedExample = ref<string>('getting-started')
+// Initialize with the first example's id
+const selectedExample = ref<string>(examples[0].id)
 
 const currentExample = computed(() => {
   return examples.find((ex) => ex.id === selectedExample.value) || null

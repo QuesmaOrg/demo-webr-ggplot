@@ -137,6 +137,11 @@ const handleExampleSelect = async (example: RExample) => {
       console.error('Failed to load CSV for example:', error)
     }
   } else {
+    // Reset CSV data for examples without datasets
+    if (currentCsvData.value) {
+      handleFileRemoved()
+    }
+    
     // Execute code immediately for examples without CSV
     if (example.code.trim()) {
       clearMessages() // Clear console and charts before running
