@@ -81,9 +81,10 @@ watch(
 .output-content {
   flex: 1;
   padding: 0;
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .loading {
@@ -124,18 +125,20 @@ watch(
 .chart-display {
   flex: 1;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding: 0;
+  padding: 1rem;
   background: #fff;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .chart-image {
   max-width: 100%;
   max-height: 100%;
+  width: auto;
   height: auto;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  object-fit: contain;
 }
 
 .console-section {
