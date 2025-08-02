@@ -7,6 +7,7 @@
 ## Code Quality Rules
 
 - NEVER fail silently - always log errors and make failures visible to users when appropriate.
+- If a composable is used within only one Vue component, keep it in that component file - do NOT create a separate composable file.
 
 ## Testing Philosophy
 
