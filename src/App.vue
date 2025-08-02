@@ -66,6 +66,33 @@ const hasWarnings = computed(() => {
   return textMessages.value.some(msg => msg.type === 'warning')
 })
 
+// Group consecutive messages of the same type for cleaner display
+const groupedMessages = computed(() => {
+  const groups: Array<{type: string, content: string, showLabel: boolean}> = []
+  
+  for (const message of textMessages.value) {
+    const lastGroup = groups[groups.length - 1]
+    
+    // Clean up excessive line breaks from the message content
+    const cleanContent = message.content.replace(/\n\s*\n\s*\n/g, '\n').trim()
+    
+    if (lastGroup && lastGroup.type === message.type) {
+      // Same type as previous - append content with single line break
+      lastGroup.content += '\n' + cleanContent
+    } else {
+      // New type - create new group
+      const showLabel = message.type !== 'stdout' // Don't show label for stdout
+      groups.push({
+        type: message.type,
+        content: cleanContent,
+        showLabel
+      })
+    }
+  }
+  
+  return groups
+})
+
 const runCode = async () => {
   if (code.value.trim()) {
     clearConsoleMessages() // Clear console messages but keep charts visible
@@ -265,17 +292,17 @@ onMounted(async () => {
               </div>
               <div class="console-messages">
                 <div 
-                  v-for="(message, index) in textMessages" 
-                  :key="'text-' + index" 
+                  v-for="(group, index) in groupedMessages" 
+                  :key="'group-' + index" 
                   class="console-message" 
-                  :class="message.type"
+                  :class="[group.type, { 'no-label': !group.showLabel }]"
                 >
-                  <span class="message-label">{{ message.type.toUpperCase() }}:</span>
+                  <span v-if="group.showLabel" class="message-label">{{ group.type.toUpperCase() }}:</span>
                   <pre 
-                    v-if="message.type === 'stdout' || message.type === 'stderr'" 
+                    v-if="group.type === 'stdout' || group.type === 'stderr'" 
                     class="message-text"
-                  >{{ message.content }}</pre>
-                  <span v-else class="message-text">{{ message.content }}</span>
+                  >{{ group.content }}</pre>
+                  <span v-else class="message-text">{{ group.content }}</span>
                 </div>
               </div>
             </div>
@@ -556,6 +583,10 @@ onMounted(async () => {
   margin-bottom: 0.5rem;
   font-size: 0.75rem;
   line-height: 1.4;
+}
+
+.console-message.no-label {
+  gap: 0;
 }
 
 .console-message:last-child {
