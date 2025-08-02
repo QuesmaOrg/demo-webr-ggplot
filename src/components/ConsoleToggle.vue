@@ -5,6 +5,7 @@ import type { WebRMessage } from '../types'
 interface Props {
   messages: WebRMessage[]
   isOpen: boolean
+  isLoading?: boolean
 }
 
 interface Emits {
@@ -28,18 +29,26 @@ const hasWarnings = computed(() => {
 })
 
 const toggleConsole = (): void => {
-  emit('toggle')
+  if (!props.isLoading) {
+    emit('toggle')
+  }
 }
 </script>
 
 <template>
   <button 
     class="console-toggle"
-    :class="{ 'has-errors': hasErrors, 'has-warnings': hasWarnings && !hasErrors }"
+    :class="{ 
+      'has-errors': hasErrors, 
+      'has-warnings': hasWarnings && !hasErrors,
+      'is-loading': isLoading
+    }"
+    :disabled="isLoading"
     @click="toggleConsole"
   >
-    Console ({{ textMessages.length }})
+    {{ isLoading ? 'Running...' : `Console (${textMessages.length})` }}
     <span
+      v-if="!isLoading"
       class="toggle-arrow"
       :class="{ 'open': isOpen }"
     >▼</span>
@@ -76,6 +85,17 @@ const toggleConsole = (): void => {
   background: #fefbf2;
   border-color: #fed7aa;
   color: #d97706;
+}
+
+.console-toggle.is-loading {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.console-toggle:disabled {
+  opacity: 0.7;
 }
 
 .toggle-arrow {

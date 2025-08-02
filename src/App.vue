@@ -206,6 +206,7 @@ onMounted(async () => {
           <ConsoleToggle 
             :messages="messages"
             :is-open="consoleRef?.showConsole || false"
+            :is-loading="isLoading"
             @toggle="consoleRef?.toggleConsole"
           />
         </div>
