@@ -8,6 +8,12 @@
 
 - NEVER fail silently - always log errors and make failures visible to users when appropriate.
 
+## Testing Philosophy
+
+- DON'T test implementation details like "finding messages with specific text" - these are non-tests
+- DON'T test trivial functionality that just confirms code does what it was written to do
+- DO test actual business logic and user-facing behavior that could realistically break
+
 ## Type Safety Requirements
 
 - AVOID using `any` types to mask type checking - this defeats the purpose of TypeScript
