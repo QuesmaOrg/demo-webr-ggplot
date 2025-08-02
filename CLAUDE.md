@@ -9,6 +9,38 @@
 - NEVER fail silently - always log errors and make failures visible to users when appropriate.
 - If a composable is used within only one Vue component, keep it in that component file - do NOT create a separate composable file.
 
+## WebR Documentation References
+
+Always reference the official WebR documentation when working with WebR features. Be eager to check and link to relevant sections:
+
+**Official WebR Documentation**: https://docs.r-wasm.org/webr/latest/
+
+### Table of Contents with Links:
+- [Getting Started](https://docs.r-wasm.org/webr/latest/getting-started.html)
+- [Downloading WebR](https://docs.r-wasm.org/webr/latest/downloading.html)
+- [Serving Pages with WebR](https://docs.r-wasm.org/webr/latest/serving.html)
+- [Examples using WebR](https://docs.r-wasm.org/webr/latest/examples.html)
+- [Worker Communication](https://docs.r-wasm.org/webr/latest/communication.html)
+- [Evaluating R Code](https://docs.r-wasm.org/webr/latest/evaluating.html) ⭐ *Key for our composables*
+- [Plotting](https://docs.r-wasm.org/webr/latest/plotting.html) ⭐ *Used in our ggplot2 demos*
+- [Networking](https://docs.r-wasm.org/webr/latest/networking.html)
+- [Working with R Objects](https://docs.r-wasm.org/webr/latest/objects.html) ⭐ *Critical for data handling*
+- [Managing R Objects](https://docs.r-wasm.org/webr/latest/objects.html#managing-r-objects)
+- [Converting to JavaScript](https://docs.r-wasm.org/webr/latest/convert-js.html) ⭐ *Used extensively*
+- [Creating New R Objects](https://docs.r-wasm.org/webr/latest/objects.html#creating-new-r-objects)
+- [Installing R Packages](https://docs.r-wasm.org/webr/latest/packages.html) ⭐ *For our library management*
+- [Building R Packages](https://docs.r-wasm.org/webr/latest/building.html)
+- [Mounting Filesystem Data](https://docs.r-wasm.org/webr/latest/mounting.html) ⭐ *For CSV uploads*
+- [WebR API](https://docs.r-wasm.org/webr/latest/api.html)
+- [R API](https://docs.r-wasm.org/webr/latest/api/r.html)
+- [JavaScript API](https://docs.r-wasm.org/webr/latest/api/js.html) ⭐ *Main reference*
+
+### Key Principles:
+- Always link to relevant WebR docs when implementing features
+- Use WebR best practices as documented
+- Reference specific API methods and their documentation
+- Show developers this is a proper WebR showcase, not just a demo
+
 ## Testing Philosophy
 
 - DON'T test implementation details like "finding messages with specific text" - these are non-tests
