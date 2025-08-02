@@ -110,7 +110,7 @@ export const createExtractContentFunction = (webRInstance: WebR, isReadyRef: Ref
     
     try {
       jsResult = await proxy.toJs()
-    } catch (error) {
+    } catch (_error) {
       // Expected for complex R objects (dplyr groups, etc.) - use R serialization
       return await serializeComplexRObject(proxy)
     }

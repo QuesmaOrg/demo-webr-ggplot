@@ -49,7 +49,7 @@ export const useWebR = (): UseWebRReturn => {
           interactive: false,
           channelType: 0, // 0 = SharedArrayBuffer
         });
-      } catch (error) {
+      } catch (_error) {
         console.warn(
           "SharedArrayBuffer not available, falling back to PostMessage"
         );
@@ -84,7 +84,7 @@ export const useWebR = (): UseWebRReturn => {
       if (initialCode && initialCode.trim()) {
         await executeCode(initialCode);
       }
-    } catch (error) {
+    } catch (_error) {
       loadingStatus.value = "WebR Failed";
       addMessage("error", `Failed to initialize WebR: ${error}`);
     } finally {
@@ -129,7 +129,7 @@ export const useWebR = (): UseWebRReturn => {
         "success",
         `CSV file '${fileName}' uploaded to /tmp/${fileName}`
       );
-    } catch (error) {
+    } catch (_error) {
       addMessage("error", `Failed to upload CSV: ${error}`);
     }
   };
@@ -151,7 +151,7 @@ export const useWebR = (): UseWebRReturn => {
         installedLibraries.delete(library);
         addMessage("info", `${library} removed from available libraries`);
       }
-    } catch (error) {
+    } catch (_error) {
       addMessage("error", `Failed to install ${library}: ${error}`);
     } finally {
       isInitializing.value = false;
@@ -180,7 +180,7 @@ export const useWebR = (): UseWebRReturn => {
         // Remove "R version" prefix to get clean version string
         rVersion.value = rVersionJs.values[0].replace(/^R version /, "R ");
       }
-    } catch (error) {
+    } catch (_error) {
       // R version query is optional - fail silently
     }
 
@@ -188,7 +188,7 @@ export const useWebR = (): UseWebRReturn => {
     try {
       // Try to get from webR object first, fallback to import meta
       webrVersion.value = "0.5.4"; // We know this from package.json
-    } catch (error) {
+    } catch (_error) {
       // WebR version query is optional - fail silently
     }
 
@@ -214,7 +214,7 @@ export const useWebR = (): UseWebRReturn => {
           ) {
             packageVersions[pkg] = jsResult.values[0];
           }
-        } catch (error) {
+        } catch (_error) {
           // Package version query is optional - fail silently
         }
       }
