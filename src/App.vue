@@ -46,7 +46,6 @@ const {
   initializeWebR,
   executeCode,
   uploadCsvData,
-  clearMessages,
   clearConsoleMessages,
   toggleLibrary,
 } = useWebR()
@@ -93,7 +92,7 @@ const groupedMessages = computed(() => {
   return groups
 })
 
-const runCode = async () => {
+const runCode = async (): Promise<void> => {
   if (code.value.trim()) {
     clearConsoleMessages() // Clear console messages but keep charts visible
     await executeCode(code.value)
@@ -107,23 +106,23 @@ const runCode = async () => {
   }
 }
 
-const handleFileUpload = async (csvData: CsvData) => {
+const handleFileUpload = async (csvData: CsvData): Promise<void> => {
   currentCsvData.value = csvData
   await uploadCsvData(csvData)
 }
 
-const handleFileRemoved = () => {
+const handleFileRemoved = (): void => {
   currentCsvData.value = null
   // Clear any data-related variables in R
   void executeCode('if (exists("data")) rm(data)')
 }
 
-const handleExampleSelect = async (example: RExample) => {
+const handleExampleSelect = async (example: RExample): Promise<void> => {
   code.value = example.code
   
   // Wait for WebR to be ready before loading CSV
   if (!isReady.value) {
-    console.log('WebR not ready yet, waiting...')
+    // WebR not ready yet - just return silently
     return
   }
   
@@ -133,7 +132,7 @@ const handleExampleSelect = async (example: RExample) => {
       const response = await fetch(example.csvUrl)
       if (response.ok) {
         const csvContent = await response.text()
-        const parseCsvInfo = (content: string) => {
+        const parseCsvInfo = (content: string): { rows: number; columns: number; columnNames: string[] } => {
           const lines = content.trim().split('\n')
           const columnNames = lines[0].split(',').map(name => name.trim().replace(/^"|"$/g, ''))
           return {
@@ -194,7 +193,7 @@ const handleExampleSelect = async (example: RExample) => {
 }
 
 // Fetch GitHub stars
-const fetchGitHubStars = async () => {
+const fetchGitHubStars = async (): Promise<void> => {
   try {
     const response = await fetch(GITHUB_API_URL)
     if (response.ok) {
@@ -224,22 +223,46 @@ onMounted(async () => {
     <header class="header">
       <div class="header-content">
         <div>
-          <h1 class="title">WebR ggplot2 & dplyr Demo</h1>
-          <p class="subtitle">Interactive R data visualization and manipulation in the browser</p>
+          <h1 class="title">
+            WebR ggplot2 & dplyr Demo
+          </h1>
+          <p class="subtitle">
+            Interactive R data visualization and manipulation in the browser
+          </p>
         </div>
         <a
           href="https://github.com/QuesmaOrg/demo-webr-ggplot"
           target="_blank" 
           rel="noopener noreferrer" 
           class="github-link"
-          aria-label="View on GitHub">
-          <svg class="github-icon" :viewBox="icons.github.viewBox" width="16" height="16">
-            <path fill="currentColor" :d="icons.github.path" />
+          aria-label="View on GitHub"
+        >
+          <svg
+            class="github-icon"
+            :viewBox="icons.github.viewBox"
+            width="16"
+            height="16"
+          >
+            <path
+              fill="currentColor"
+              :d="icons.github.path"
+            />
           </svg>
           <span class="github-text">View on GitHub</span>
-          <span v-if="githubStars !== null" class="github-stars">
-            <svg :viewBox="icons.star.viewBox" width="14" height="14" class="star-icon">
-              <path fill="currentColor" :d="icons.star.path" />
+          <span
+            v-if="githubStars !== null"
+            class="github-stars"
+          >
+            <svg
+              :viewBox="icons.star.viewBox"
+              width="14"
+              height="14"
+              class="star-icon"
+            >
+              <path
+                fill="currentColor"
+                :d="icons.star.path"
+              />
             </svg>
             {{ githubStars }}
           </span>
@@ -284,11 +307,19 @@ onMounted(async () => {
             :is-loading="isLoading"
           />
           <!-- Console overlay when expanded -->
-          <div v-if="showConsole" class="console-overlay">
+          <div
+            v-if="showConsole"
+            class="console-overlay"
+          >
             <div class="console-content">
               <div class="console-header">
                 <span class="console-title">Console Output</span>
-                <button class="console-close" @click="showConsole = false">×</button>
+                <button
+                  class="console-close"
+                  @click="showConsole = false"
+                >
+                  ×
+                </button>
               </div>
               <div class="console-messages">
                 <div 
@@ -297,12 +328,18 @@ onMounted(async () => {
                   class="console-message" 
                   :class="[group.type, { 'no-label': !group.showLabel }]"
                 >
-                  <span v-if="group.showLabel" class="message-label">{{ group.type.toUpperCase() }}:</span>
+                  <span
+                    v-if="group.showLabel"
+                    class="message-label"
+                  >{{ group.type.toUpperCase() }}:</span>
                   <pre 
                     v-if="group.type === 'stdout' || group.type === 'stderr'" 
                     class="message-text"
                   >{{ group.content }}</pre>
-                  <span v-else class="message-text">{{ group.content }}</span>
+                  <span
+                    v-else
+                    class="message-text"
+                  >{{ group.content }}</span>
                 </div>
               </div>
             </div>
@@ -321,7 +358,10 @@ onMounted(async () => {
           >
             {{ !isReady ? 'Waiting for WebR...' : isLoading ? 'Running...' : 'Run Code' }}
           </button>
-          <div v-if="isReady && rVersion" class="runtime-versions">
+          <div
+            v-if="isReady && rVersion"
+            class="runtime-versions"
+          >
             <span>{{ rVersion }}</span>
           </div>
         </div>
@@ -332,7 +372,10 @@ onMounted(async () => {
             @click="showConsole = !showConsole"
           >
             Console ({{ textMessages.length }})
-            <span class="toggle-arrow" :class="{ 'open': showConsole }">▼</span>
+            <span
+              class="toggle-arrow"
+              :class="{ 'open': showConsole }"
+            >▼</span>
           </button>
         </div>
       </div>

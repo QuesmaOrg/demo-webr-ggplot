@@ -29,8 +29,8 @@ The goal is to reduce complexity by ~40% while keeping the same user experience.
 - `@vitejs/plugin-vue` - Vue support for Vite
 
 ### Package Manager
-- Switch from pnpm to npm for simpler setup
-- Remove pnpm-specific configuration files
+- Keep using pnpm as specified in project requirements
+- Remove hash from packageManager field for cleaner config
 
 ## 2. Component Consolidation
 
@@ -154,8 +154,6 @@ webr-ggplot2/
 
 ### Current Setup
 ```bash
-# Install pnpm
-npm install -g pnpm
 # Install dependencies
 pnpm install
 # Run dev server
@@ -167,11 +165,11 @@ pnpm build
 ### Simplified Setup
 ```bash
 # Install and run
-npm install
-npm run dev
+pnpm install
+pnpm dev
 
 # Build
-npm run build
+pnpm build
 ```
 
 ### README Improvements

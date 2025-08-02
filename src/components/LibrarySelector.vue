@@ -28,20 +28,20 @@ const availableLibraries = [
 
 const installedCount = computed(() => props.installedLibraries.size)
 
-const handleToggle = (library: string, event: Event) => {
+const handleToggle = (library: string, event: Event): void => {
   const target = event.target as HTMLInputElement
   emit('toggleLibrary', library, target.checked)
 }
 
 const dropdownRef = ref<HTMLElement>()
 
-const toggleDropdown = () => {
+const toggleDropdown = (): void => {
   if (!props.isLoading) {
     isOpen.value = !isOpen.value
   }
 }
 
-const handleClickOutside = (event: MouseEvent) => {
+const handleClickOutside = (event: MouseEvent): void => {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
     isOpen.value = false
   }
@@ -57,7 +57,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="dropdownRef" class="library-selector">
+  <div
+    ref="dropdownRef"
+    class="library-selector"
+  >
     <button 
       :disabled="isLoading"
       class="libraries-button"
@@ -66,10 +69,16 @@ onUnmounted(() => {
     >
       <span class="libraries-icon">📚</span>
       <span class="libraries-text">Libraries ({{ installedCount }})</span>
-      <span class="dropdown-arrow" :class="{ 'open': isOpen }">▼</span>
+      <span
+        class="dropdown-arrow"
+        :class="{ 'open': isOpen }"
+      >▼</span>
     </button>
     
-    <div v-if="isOpen" class="libraries-dropdown">
+    <div
+      v-if="isOpen"
+      class="libraries-dropdown"
+    >
       <div class="libraries-header">
         <span class="header-text">Available Libraries</span>
       </div>
@@ -86,13 +95,14 @@ onUnmounted(() => {
             :disabled="isLoading"
             class="library-checkbox"
             @change="handleToggle(library.name, $event)"
-          />
+          >
           <div class="library-info">
             <div class="library-name-row">
               <span class="library-name">{{ library.name }}</span>
               <span
-v-if="installedLibraries.has(library.name) && packageVersions[library.name]" 
-                    class="library-version">{{ packageVersions[library.name] }}</span>
+                v-if="installedLibraries.has(library.name) && packageVersions[library.name]" 
+                class="library-version"
+              >{{ packageVersions[library.name] }}</span>
             </div>
             <span class="library-desc">{{ library.description }}</span>
           </div>

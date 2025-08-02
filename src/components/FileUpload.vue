@@ -28,7 +28,7 @@ const parseCsvInfo = (content: string): { rows: number; columns: number; columnN
   }
 }
 
-const handleDrop = (event: DragEvent) => {
+const handleDrop = (event: DragEvent): void => {
   event.preventDefault()
   event.stopPropagation()
   isDragging.value = false
@@ -38,33 +38,33 @@ const handleDrop = (event: DragEvent) => {
   }
 }
 
-const handleDragOver = (event: DragEvent) => {
+const handleDragOver = (event: DragEvent): void => {
   event.preventDefault()
   event.stopPropagation()
   isDragging.value = true
 }
 
-const handleDragLeave = (event: DragEvent) => {
+const handleDragLeave = (event: DragEvent): void => {
   event.preventDefault()
   event.stopPropagation()
   isDragging.value = false
 }
 
-const handleFileSelect = (event: Event) => {
+const handleFileSelect = (event: Event): void => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files.length > 0) {
     processFile(target.files[0])
   }
 }
 
-const processFile = (file: File) => {
+const processFile = (file: File): void => {
   if (!file.name.endsWith('.csv')) {
     alert('Please select a CSV file')
     return
   }
 
   const reader = new FileReader()
-  reader.onload = (e) => {
+  reader.onload = (e): void => {
     const content = e.target?.result as string
     const { rows, columns, columnNames } = parseCsvInfo(content)
     const csvData: CsvData = {
@@ -79,7 +79,7 @@ const processFile = (file: File) => {
   reader.readAsText(file)
 }
 
-const loadFromUrl = async () => {
+const loadFromUrl = async (): Promise<void> => {
   if (!urlInput.value.trim()) {
     return
   }
@@ -109,7 +109,7 @@ const loadFromUrl = async () => {
   }
 }
 
-const removeFile = () => {
+const removeFile = (): void => {
   isOpen.value = false
   showUrlInput.value = false
   urlInput.value = ''
@@ -119,13 +119,13 @@ const removeFile = () => {
   emit('fileRemoved')
 }
 
-const toggleDropdown = () => {
+const toggleDropdown = (): void => {
   if (props.uploadedFile) {
     isOpen.value = !isOpen.value
   }
 }
 
-const handleClickOutside = (event: MouseEvent) => {
+const handleClickOutside = (event: MouseEvent): void => {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
     isOpen.value = false
   }
@@ -141,30 +141,49 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="dropdownRef" class="file-upload">
+  <div
+    ref="dropdownRef"
+    class="file-upload"
+  >
     <div
-      v-if="!props.uploadedFile" class="csv-drop-zone" 
+      v-if="!props.uploadedFile"
+      class="csv-drop-zone" 
       :class="{ 'dragging': isDragging }"
       @drop="handleDrop"
       @dragover="handleDragOver"
       @dragleave="handleDragLeave"
     >
-      
       <!-- URL Input Section (when active) -->
-      <div v-if="showUrlInput" class="url-input-section">
+      <div
+        v-if="showUrlInput"
+        class="url-input-section"
+      >
         <input 
           v-model="urlInput"
           type="url"
           placeholder="Enter CSV URL (e.g., https://example.com/data.csv)"
           class="url-input"
           @keyup.enter="loadFromUrl"
-        />
-        <button class="thin-btn primary" @click="loadFromUrl">Load</button>
-        <button class="thin-btn" @click="showUrlInput = false">Cancel</button>
+        >
+        <button
+          class="thin-btn primary"
+          @click="loadFromUrl"
+        >
+          Load
+        </button>
+        <button
+          class="thin-btn"
+          @click="showUrlInput = false"
+        >
+          Cancel
+        </button>
       </div>
       
       <!-- Default CSV upload options -->
-      <div v-else class="csv-options">
+      <div
+        v-else
+        class="csv-options"
+      >
         <input
           ref="fileInputRef"
           type="file"
@@ -172,18 +191,27 @@ onUnmounted(() => {
           class="file-input"
           style="display: none;"
           @change="handleFileSelect"
-        />
+        >
         <span class="drop-text">Drop CSV here</span>
-        <button class="thin-btn" @click="fileInputRef?.click()">
+        <button
+          class="thin-btn"
+          @click="fileInputRef?.click()"
+        >
           or upload file
         </button>
-        <button class="thin-btn" @click="showUrlInput = true">
+        <button
+          class="thin-btn"
+          @click="showUrlInput = true"
+        >
           or load from URL
         </button>
       </div>
     </div>
     
-    <div v-else class="csv-info-container">
+    <div
+      v-else
+      class="csv-info-container"
+    >
       <button 
         class="csv-button"
         @click="toggleDropdown"
@@ -191,13 +219,25 @@ onUnmounted(() => {
         <span class="csv-text">
           {{ props.uploadedFile.name }} ({{ props.uploadedFile.rows }} × {{ props.uploadedFile.columns }})
         </span>
-        <span class="dropdown-arrow" :class="{ 'open': isOpen }">▼</span>
+        <span
+          class="dropdown-arrow"
+          :class="{ 'open': isOpen }"
+        >▼</span>
       </button>
       
-      <div v-if="isOpen" class="csv-dropdown">
+      <div
+        v-if="isOpen"
+        class="csv-dropdown"
+      >
         <div class="csv-header">
           <span class="header-text">CSV Information</span>
-          <button class="remove-btn" title="Remove file" @click="removeFile">×</button>
+          <button
+            class="remove-btn"
+            title="Remove file"
+            @click="removeFile"
+          >
+            ×
+          </button>
         </div>
         <div class="csv-details">
           <div class="detail-item">

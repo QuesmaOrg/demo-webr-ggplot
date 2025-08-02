@@ -14,7 +14,7 @@ const currentExample = computed(() => {
   return examples.find((ex) => ex.id === selectedExample.value) || null
 })
 
-const handleExampleChange = () => {
+const handleExampleChange = (): void => {
   if (currentExample.value) {
     emit('exampleSelected', currentExample.value)
   }
@@ -29,7 +29,11 @@ const handleExampleChange = () => {
       class="select"
       @change="handleExampleChange"
     >
-      <option v-for="example in examples" :key="example.id" :value="example.id">
+      <option
+        v-for="example in examples"
+        :key="example.id"
+        :value="example.id"
+      >
         {{ example.title }}
       </option>
     </select>
