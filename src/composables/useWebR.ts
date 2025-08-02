@@ -1,300 +1,225 @@
-import { ref, reactive } from 'vue'
-import type { WebRMessage, CsvData, WebROutputItem, WebRCharacterObject, WebRListObject, WebRProxy, WebRExecutionResult } from '@/types'
+import { ref, reactive } from "vue";
+import type { WebR, Shelter } from "webr";
+import type { WebRMessage, CsvData } from "@/types";
+import type { UseWebRReturn } from "@/types/state";
+import { createExecuteCodeFunction } from "./useWebRExecution";
 
-// WebR output type mapping - immutable and reusable
-const WEBR_TYPE_MAP = {
-  stdout: 'stdout',
-  stderr: 'stderr', 
-  message: 'info',
-  warning: 'warning',
-  error: 'error'
-} as const satisfies Record<string, WebRMessage['type']>
+export const useWebR = (): UseWebRReturn => {
+  const isReady = ref(false);
+  const isLoading = ref(false); // For code execution
+  const isInitializing = ref(false); // For WebR initialization
+  const loadingStatus = ref("");
+  const installedLibraries = reactive(new Set<string>());
+  const messages = reactive<WebRMessage[]>([]);
+  const packageVersions = reactive<Record<string, string>>({});
+  const webrVersion = ref<string>("");
+  const rVersion = ref<string>("");
 
-// Type guards for WebR objects
-const isWebRCharacterObject = (obj: unknown): obj is WebRCharacterObject => {
-  return typeof obj === 'object' && obj !== null && 
-         'type' in obj && obj.type === 'character' &&
-         'values' in obj && Array.isArray(obj.values)
-}
+  let webR: WebR | null = null;
+  let shelter: Shelter | null = null;
 
-const isWebRListObject = (obj: unknown): obj is WebRListObject => {
-  return typeof obj === 'object' && obj !== null && 
-         'type' in obj && obj.type === 'list' &&
-         'values' in obj && Array.isArray(obj.values)
-}
+  const addMessage = (type: WebRMessage["type"], content: string): void => {
+    messages.push({ type, content });
+  };
 
-// Extract content from WebR output with proper type checking
-const extractContentFromWebROutput = async (output: WebROutputItem): Promise<string> => {
-  if (typeof output.data === 'string') {
-    return output.data
-  }
+  const clearMessages = (): void => {
+    messages.splice(0, messages.length);
+  };
 
-  // Convert WebR proxy to JavaScript object
-  const proxy = output.data as WebRProxy
-  const jsResult = await proxy.toJs()
-  
-  if (isWebRCharacterObject(jsResult)) {
-    return jsResult.values.join('\n')
-  }
-  
-  if (isWebRListObject(jsResult)) {
-    // Validate assumption: we expect only 1 message in the list
-    if (jsResult.values.length > 1) {
-      console.error(`ASSUMPTION VIOLATION: List has ${jsResult.values.length} values, expected 1:`, jsResult)
-    }
-    
-    const messageObject = jsResult.values[0]
-    if (isWebRCharacterObject(messageObject) && messageObject.values.length > 0) {
-      return messageObject.values.join('\n')
-    }
-    
-    console.error('Unexpected list structure:', jsResult)
-    return '[Unable to extract message from list]'
-  }
-  
-  console.error('Unknown WebR object type:', jsResult)
-  return `[Unknown WebR type: ${(jsResult as any)?.type || 'unknown'}]`
-}
-
-export const useWebR = () => {
-  const isReady = ref(false)
-  const isLoading = ref(false) // For code execution
-  const isInitializing = ref(false) // For WebR initialization
-  const loadingStatus = ref('')
-  const installedLibraries = reactive(new Set<string>())
-  const messages = reactive<WebRMessage[]>([])
-  const packageVersions = reactive<Record<string, string>>({})
-  const webrVersion = ref<string>('')
-  const rVersion = ref<string>('')
-  
-  let webR: any = null
-  let shelter: any = null
-
-  const initializeWebR = async (initialCode?: string) => {
-    try {
-      isInitializing.value = true
-      loadingStatus.value = 'Initializing WebR...'
-      
-      // Import WebR from installed package
-      const { WebR } = await import('webr')
-      
-      // Initialize WebR with fallback channel types
-      try {
-        webR = new WebR({ 
-          interactive: false,
-          channelType: 0 // 0 = SharedArrayBuffer
-        })
-      } catch (error) {
-        console.log('SharedArrayBuffer not available, falling back to PostMessage')
-        webR = new WebR({ 
-          interactive: false,
-          channelType: 1 // 1 = PostMessage
-        })
-      }
-      
-      await webR.init()
-      shelter = await new webR.Shelter()
-      
-      // Install packages one by one with status updates
-      const packages = ['ggplot2', 'dplyr', 'ggrepel']
-      for (const pkg of packages) {
-        loadingStatus.value = `Installing ${pkg}...`
-        await webR.installPackages([pkg])
-        installedLibraries.add(pkg)
-      }
-      
-      isReady.value = true
-      loadingStatus.value = 'WebR Ready'
-      addMessage('success', 'WebR initialized successfully with ggplot2, dplyr, and ggrepel')
-      
-      // Query version information
-      await queryVersionInfo()
-      
-      // Auto-execute initial code if provided
-      if (initialCode && initialCode.trim()) {
-        await executeCode(initialCode)
-      }
-    } catch (error) {
-      console.error('WebR initialization failed:', error)
-      loadingStatus.value = 'WebR Failed'
-      addMessage('error', `Failed to initialize WebR: ${error}`)
-    } finally {
-      isInitializing.value = false
-    }
-  }
-
-  const addMessage = (type: WebRMessage['type'], content: string) => {
-    messages.push({ type, content })
-  }
-
-  const clearMessages = () => {
-    messages.splice(0, messages.length)
-  }
-
-  const clearConsoleMessages = () => {
+  const clearConsoleMessages = (): void => {
     // Remove only non-plot messages, keep charts visible during execution
     for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].type !== 'plot') {
-        messages.splice(i, 1)
+      if (messages[i].type !== "plot") {
+        messages.splice(i, 1);
       }
     }
-  }
+  };
 
-  const executeCode = async (code: string) => {
-    if (!webR || !isReady.value) {
-      addMessage('error', 'WebR is not ready. Please wait for initialization.')
-      return
+  const initializeWebR = async (initialCode?: string): Promise<void> => {
+    try {
+      isInitializing.value = true;
+      loadingStatus.value = "Initializing WebR...";
+
+      // Import WebR from installed package
+      const { WebR } = await import("webr");
+
+      // Initialize WebR with fallback channel types
+      try {
+        webR = new WebR({
+          interactive: false,
+          channelType: 0, // 0 = SharedArrayBuffer
+        });
+      } catch (_error) {
+        console.warn(
+          "SharedArrayBuffer not available, falling back to PostMessage"
+        );
+        webR = new WebR({
+          interactive: false,
+          channelType: 1, // 1 = PostMessage
+        });
+      }
+
+      await webR.init();
+      shelter = await new webR.Shelter();
+
+      // Install packages one by one with status updates
+      const packages = ["ggplot2", "dplyr", "ggrepel"];
+      for (const pkg of packages) {
+        loadingStatus.value = `Installing ${pkg}...`;
+        await webR.installPackages([pkg]);
+        installedLibraries.add(pkg);
+      }
+
+      isReady.value = true;
+      loadingStatus.value = "WebR Ready";
+      addMessage(
+        "success",
+        "WebR initialized successfully with ggplot2, dplyr, and ggrepel"
+      );
+
+      // Query version information
+      await queryVersionInfo();
+
+      // Auto-execute initial code if provided
+      if (initialCode && initialCode.trim()) {
+        await executeCode(initialCode);
+      }
+    } catch (_error) {
+      loadingStatus.value = "WebR Failed";
+      addMessage("error", `Failed to initialize WebR: ${error}`);
+    } finally {
+      isInitializing.value = false;
+    }
+  };
+
+  const executeCode = async (code: string): Promise<void> => {
+    if (!webR || !shelter) {
+      addMessage("error", "WebR is not ready. Please wait for initialization.");
+      return;
     }
 
     try {
-      isLoading.value = true
-      
-      // Capture output and graphics
-      const result = await shelter.captureR(code, {
-        withAutoprint: true,
-        captureStreams: true,
-        captureConditions: true,
-        captureGraphics: true,
-        env: webR.objs.globalEnv,
-      })
-
-      // Process all output (streams and conditions)
-      const typedResult = result as WebRExecutionResult
-      if (typedResult.output && typedResult.output.length > 0) {
-        for (const output of typedResult.output) {
-          const content = await extractContentFromWebROutput(output)
-          const messageType = WEBR_TYPE_MAP[output.type as keyof typeof WEBR_TYPE_MAP]
-          
-          if (!messageType) {
-            console.error(`Unknown WebR output type: ${output.type}`)
-            addMessage('error', `Unknown output type: ${output.type}`)
-            continue
-          }
-          
-          addMessage(messageType, content)
-        }
-      }
-
-      // Handle captured graphics
-      if (result.images && result.images.length > 0) {
-        for (const img of result.images) {
-          // Create canvas and convert to data URL
-          const canvas = document.createElement('canvas')
-          canvas.width = img.width
-          canvas.height = img.height
-          
-          const ctx = canvas.getContext('2d')
-          if (ctx) {
-            ctx.drawImage(img, 0, 0)
-            const dataUrl = canvas.toDataURL()
-            addMessage('plot', dataUrl)
-          }
-        }
-      }
-
-      // Process return value if it exists
-      if (result.result && result.result.type !== 'null') {
-        const resultStr = await webR.evalR(`
-          capture.output(print(.Last.value))
-        `)
-        if (resultStr.values && resultStr.values.length > 0) {
-          addMessage('stdout', resultStr.values.join('\n'))
-        }
-      }
-
-    } catch (error) {
-      console.error('R execution error:', error)
-      addMessage('error', `R execution failed: ${error}`)
+      isLoading.value = true;
+      const codeExecutor = createExecuteCodeFunction(
+        webR,
+        shelter,
+        isReady,
+        addMessage
+      );
+      await codeExecutor(code);
     } finally {
-      isLoading.value = false
+      isLoading.value = false;
     }
-  }
+  };
 
-  const uploadCsvData = async (csvData: CsvData) => {
+  const uploadCsvData = async (csvData: CsvData): Promise<void> => {
     if (!webR || !isReady.value) {
-      addMessage('error', 'WebR is not ready. Please wait for initialization.')
-      return
+      addMessage("error", "WebR is not ready. Please wait for initialization.");
+      return;
     }
 
     try {
       // Write the CSV content as a UTF-8 encoded file
-      const fileName = csvData.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-      const encoder = new TextEncoder()
-      const csvBytes = encoder.encode(csvData.content)
-      await webR.FS.writeFile(`/tmp/${fileName}`, csvBytes)
-      
-      addMessage('success', `CSV file '${fileName}' uploaded to /tmp/${fileName}`)
-      
-    } catch (error) {
-      console.error('CSV upload error:', error)
-      addMessage('error', `Failed to upload CSV: ${error}`)
-    }
-  }
+      const fileName = csvData.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+      const encoder = new TextEncoder();
+      const csvBytes = encoder.encode(csvData.content);
+      await webR.FS.writeFile(`/tmp/${fileName}`, csvBytes);
 
-  const toggleLibrary = async (library: string, install: boolean) => {
-    if (!webR) {return}
-    
+      addMessage(
+        "success",
+        `CSV file '${fileName}' uploaded to /tmp/${fileName}`
+      );
+    } catch (_error) {
+      addMessage("error", `Failed to upload CSV: ${error}`);
+    }
+  };
+
+  const toggleLibrary = async (library: string, install: boolean): Promise<void> => {
+    if (!webR) {
+      return;
+    }
+
     try {
       if (install) {
-        loadingStatus.value = `Installing ${library}...`
-        isInitializing.value = true
-        await webR.installPackages([library])
-        installedLibraries.add(library)
-        addMessage('success', `${library} installed successfully`)
+        loadingStatus.value = `Installing ${library}...`;
+        isInitializing.value = true;
+        await webR.installPackages([library]);
+        installedLibraries.add(library);
+        addMessage("success", `${library} installed successfully`);
       } else {
         // Note: WebR doesn't support uninstalling packages
-        installedLibraries.delete(library)
-        addMessage('info', `${library} removed from available libraries`)
+        installedLibraries.delete(library);
+        addMessage("info", `${library} removed from available libraries`);
       }
-    } catch (error) {
-      addMessage('error', `Failed to install ${library}: ${error}`)
+    } catch (_error) {
+      addMessage("error", `Failed to install ${library}: ${error}`);
     } finally {
-      isInitializing.value = false
-      loadingStatus.value = isReady.value ? 'WebR Ready' : loadingStatus.value
+      isInitializing.value = false;
+      loadingStatus.value = isReady.value ? "WebR Ready" : loadingStatus.value;
     }
-  }
+  };
 
-  const queryVersionInfo = async () => {
-    if (!webR || !isReady.value) {return}
-    
+  const queryVersionInfo = async (): Promise<void> => {
+    if (!webR || !isReady.value) {
+      return;
+    }
+
     // Query R version
     try {
-      const rVersionResult = await webR.evalR('R.version.string')
-      const rVersionJs = await rVersionResult.toJs()
-      if (rVersionJs?.values?.[0]) {
+      const rVersionResult = await webR.evalR("R.version.string");
+      const rVersionJs = await rVersionResult.toJs();
+      // Type guard to check if this is a character object with values
+      if (
+        rVersionJs && 
+        typeof rVersionJs === 'object' && 
+        'values' in rVersionJs && 
+        Array.isArray(rVersionJs.values) && 
+        rVersionJs.values.length > 0 &&
+        typeof rVersionJs.values[0] === 'string'
+      ) {
         // Remove "R version" prefix to get clean version string
-        rVersion.value = rVersionJs.values[0].replace(/^R version /, 'R ')
+        rVersion.value = rVersionJs.values[0].replace(/^R version /, "R ");
       }
-    } catch (error) {
-      console.error('Failed to get R version:', error)
+    } catch (_error) {
+      // R version query is optional - fail silently
     }
-    
+
     // Query WebR version (from package or webR object)
     try {
       // Try to get from webR object first, fallback to import meta
-      webrVersion.value = '0.5.4' // We know this from package.json
-    } catch (error) {
-      console.error('Failed to get WebR version:', error)
+      webrVersion.value = "0.5.4"; // We know this from package.json
+    } catch (_error) {
+      // WebR version query is optional - fail silently
     }
-    
+
     // Query package versions
-    const packages = ['ggplot2', 'dplyr', 'ggrepel']
-    
+    const packages = ["ggplot2", "dplyr", "ggrepel"];
+
     for (const pkg of packages) {
       if (installedLibraries.has(pkg)) {
         try {
-          const result = await webR.evalR(`as.character(packageVersion("${pkg}"))`)
-          const jsResult = await result.toJs()
-          
-          if (jsResult?.values?.[0]) {
-            packageVersions[pkg] = jsResult.values[0]
+          const result = await webR.evalR(
+            `as.character(packageVersion("${pkg}"))`
+          );
+          const jsResult = await result.toJs();
+
+          // Type guard to check if this is a character object with values
+          if (
+            jsResult && 
+            typeof jsResult === 'object' && 
+            'values' in jsResult && 
+            Array.isArray(jsResult.values) && 
+            jsResult.values.length > 0 &&
+            typeof jsResult.values[0] === 'string'
+          ) {
+            packageVersions[pkg] = jsResult.values[0];
           }
-        } catch (error) {
-          console.error(`Failed to get version for ${pkg}:`, error)
+        } catch (_error) {
+          // Package version query is optional - fail silently
         }
       }
     }
-  }
+  };
 
   return {
     isReady,
@@ -312,5 +237,5 @@ export const useWebR = () => {
     clearMessages,
     clearConsoleMessages,
     toggleLibrary,
-  }
-}
+  };
+};

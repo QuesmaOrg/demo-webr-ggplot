@@ -12,7 +12,7 @@ const props = defineProps<Props>()
 
 const outputRef = ref<HTMLElement>()
 
-const scrollToBottom = () => {
+const scrollToBottom = (): void => {
   void nextTick(() => {
     if (outputRef.value) {
       outputRef.value.scrollTop = outputRef.value.scrollHeight
@@ -20,12 +20,12 @@ const scrollToBottom = () => {
   })
 }
 
-const handlePlotLoad = () => {
-  console.log('Plot loaded successfully')
+const handlePlotLoad = (): void => {
+  // Plot loaded successfully - no need to log this normal behavior
   scrollToBottom()
 }
 
-const handlePlotError = (event: Event) => {
+const handlePlotError = (event: Event): void => {
   console.error('Plot load error:', event)
 }
 
@@ -46,26 +46,38 @@ watch(
 
 <template>
   <div class="output-display">
-    <div ref="outputRef" class="output-content">
-      <div v-if="messages.length === 0 && !isLoading" class="empty-state">
+    <div
+      ref="outputRef"
+      class="output-content"
+    >
+      <div
+        v-if="messages.length === 0 && !isLoading"
+        class="empty-state"
+      >
         <p>Run some R code to see the output here</p>
       </div>
       
       <!-- Display latest chart prominently -->
-      <div v-if="latestPlot" class="chart-display">
+      <div
+        v-if="latestPlot"
+        class="chart-display"
+      >
         <img 
           :src="latestPlot.content" 
           alt="R plot" 
           class="chart-image"
           @load="handlePlotLoad"
           @error="handlePlotError"
-        />
+        >
       </div>
       
       <!-- Loading overlay -->
-      <div v-if="isLoading" class="loading-overlay">
+      <div
+        v-if="isLoading"
+        class="loading-overlay"
+      >
         <div class="loading-content">
-          <div class="spinner"></div>
+          <div class="spinner" />
           <span>Executing R code...</span>
         </div>
       </div>

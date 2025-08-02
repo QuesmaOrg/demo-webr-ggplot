@@ -142,7 +142,6 @@ ggplot(data, aes(x = year)) +
     csvUrl: '/startup_funding.csv',
     code: `library(dplyr)
 library(ggplot2)
-library(scales)
 
 # Load startup funding data
 data <- read.csv("/tmp/startup_funding.csv", stringsAsFactors = FALSE)
@@ -156,21 +155,21 @@ sector_summary <- data %>%
   summarise(
     total_funding = sum(funding_amount_usd),
     avg_funding = mean(funding_amount_usd),
-    count = n()
+    count = n(),
+    .groups = 'drop'
   ) %>%
   arrange(desc(total_funding))
 
 print(sector_summary)
 
-# Create horizontal bar chart with formatted currency
-ggplot(data, aes(x = reorder(sector, funding_amount_usd), 
-                 y = funding_amount_usd, fill = sector)) +
+# Create horizontal bar chart
+ggplot(sector_summary, aes(x = reorder(sector, total_funding), 
+                          y = total_funding / 1e6, fill = sector)) +
   geom_col(show.legend = FALSE) +
   coord_flip() +
-  scale_y_continuous(labels = label_dollar(scale = 1e-6, suffix = "M")) +
-  labs(title = "Startup Funding by Sector",
+  labs(title = "Total Startup Funding by Sector",
        x = "Sector",
-       y = "Funding Amount (USD)") +
+       y = "Funding Amount (Million USD)") +
   theme_minimal()`,
   },
   {

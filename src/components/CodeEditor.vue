@@ -74,7 +74,10 @@ onUnmounted(() => {
 
 <template>
   <div class="code-editor">
-    <div ref="editorRef" class="editor-container"></div>
+    <div
+      ref="editorRef"
+      class="editor-container"
+    />
   </div>
 </template>
 

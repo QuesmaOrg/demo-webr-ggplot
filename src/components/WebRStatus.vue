@@ -19,10 +19,22 @@ defineProps<Props>()
         'error': !isReady && !isLoading && loadingStatus.includes('Failed') 
       }"
     >
-      <div v-if="isLoading" class="spinner"></div>
-      <span v-else-if="isReady" class="status-icon">✓</span>
-      <span v-else-if="loadingStatus.includes('Failed')" class="status-icon">✗</span>
-      <span v-else class="status-icon">⚙️</span>
+      <div
+        v-if="isLoading"
+        class="spinner"
+      />
+      <span
+        v-else-if="isReady"
+        class="status-icon"
+      >✓</span>
+      <span
+        v-else-if="loadingStatus.includes('Failed')"
+        class="status-icon"
+      >✗</span>
+      <span
+        v-else
+        class="status-icon"
+      >⚙️</span>
       <span class="status-text">
         {{ isReady && webrVersion ? `WebR ${webrVersion} Ready` : loadingStatus || 'WebR' }}
       </span>
