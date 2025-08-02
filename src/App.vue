@@ -8,29 +8,16 @@ import WebRStatus from './components/WebRStatus.vue'
 import LibrarySelector from './components/LibrarySelector.vue'
 import ConsoleOutput from './components/ConsoleOutput.vue'
 import ConsoleToggle from './components/ConsoleToggle.vue'
+import AppHeader from './components/AppHeader.vue'
+import RunButton from './components/RunButton.vue'
 import { useWebR } from './composables/useWebR'
 import { examples } from './data/examples'
-import { icons } from './data/icons'
 import type { RExample, CsvData } from './types'
-
-// Constants
-const GITHUB_REPO_OWNER = 'QuesmaOrg'
-const GITHUB_REPO_NAME = 'demo-webr-ggplot'
-const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}`
-
-// Types
-interface GitHubRepo {
-  stargazers_count: number
-  [key: string]: unknown
-}
 
 // Start with the first example (getting-started)
 const code = ref(examples[0].code)
 const lastExecutedCode = ref('')
 const hasChanges = computed(() => code.value !== lastExecutedCode.value)
-
-// GitHub stars
-const githubStars = ref<number | null>(null)
 
 // Current CSV data state
 const currentCsvData = ref<CsvData | null>(null)
@@ -146,24 +133,9 @@ const handleExampleSelect = async (example: RExample): Promise<void> => {
   }
 }
 
-// Fetch GitHub stars
-const fetchGitHubStars = async (): Promise<void> => {
-  try {
-    const response = await fetch(GITHUB_API_URL)
-    if (response.ok) {
-      const data = await response.json() as GitHubRepo
-      githubStars.value = data.stargazers_count
-    }
-  } catch (error) {
-    console.error('Failed to fetch GitHub stars:', error)
-  }
-}
-
 onMounted(async () => {
   // Initialize WebR first
   await initializeWebR('')
-  // Fetch GitHub stars
-  void fetchGitHubStars()
   
   // Execute the first example once WebR is ready
   if (isReady.value && examples.length > 0) {
@@ -174,55 +146,7 @@ onMounted(async () => {
 
 <template>
   <div id="app">
-    <header class="header">
-      <div class="header-content">
-        <div>
-          <h1 class="title">
-            WebR ggplot2 & dplyr Demo
-          </h1>
-          <p class="subtitle">
-            Interactive R data visualization and manipulation in the browser
-          </p>
-        </div>
-        <a
-          href="https://github.com/QuesmaOrg/demo-webr-ggplot"
-          target="_blank" 
-          rel="noopener noreferrer" 
-          class="github-link"
-          aria-label="View on GitHub"
-        >
-          <svg
-            class="github-icon"
-            :viewBox="icons.github.viewBox"
-            width="16"
-            height="16"
-          >
-            <path
-              fill="currentColor"
-              :d="icons.github.path"
-            />
-          </svg>
-          <span class="github-text">View on GitHub</span>
-          <span
-            v-if="githubStars !== null"
-            class="github-stars"
-          >
-            <svg
-              :viewBox="icons.star.viewBox"
-              width="14"
-              height="14"
-              class="star-icon"
-            >
-              <path
-                fill="currentColor"
-                :d="icons.star.path"
-              />
-            </svg>
-            {{ githubStars }}
-          </span>
-        </a>
-      </div>
-    </header>
+    <AppHeader />
 
     <main class="main">
       <div class="toolbar">
@@ -270,20 +194,13 @@ onMounted(async () => {
       <!-- Single unified bottom bar -->
       <div class="bottom-bar">
         <div class="bottom-bar-left">
-          <button 
-            :disabled="!isReady || isLoading" 
-            :class="{ 'has-changes': hasChanges, 'no-changes': !hasChanges }" 
-            class="run-button"
-            @click="runCode"
-          >
-            {{ !isReady ? 'Waiting for WebR...' : isLoading ? 'Running...' : 'Run Code' }}
-          </button>
-          <div
-            v-if="isReady && rVersion"
-            class="runtime-versions"
-          >
-            <span>{{ rVersion }}</span>
-          </div>
+          <RunButton 
+            :is-ready="isReady"
+            :is-loading="isLoading"
+            :has-changes="hasChanges"
+            :r-version="rVersion"
+            @run="runCode"
+          />
         </div>
         <div class="bottom-bar-right">
           <ConsoleToggle 
@@ -306,83 +223,6 @@ onMounted(async () => {
   flex-direction: column;
   overflow: hidden;
 }
-
-.header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1.5rem 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  flex-shrink: 0;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.title {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-
-.subtitle {
-  margin: 0;
-  font-size: 1.125rem;
-  opacity: 0.9;
-  font-weight: 300;
-}
-
-.github-link {
-  color: white;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  transition: all 0.3s ease;
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.github-link:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.github-icon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-.github-text {
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.github-stars {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  padding-left: 0.75rem;
-  border-left: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.star-icon {
-  width: 14px;
-  height: 14px;
-  color: #fbbf24;
-}
-
 
 .main {
   flex: 1;
@@ -423,39 +263,6 @@ onMounted(async () => {
 }
 
 
-.run-button {
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-  min-width: 80px;
-}
-
-.run-button.has-changes {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.run-button.has-changes:hover:not(:disabled) {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-}
-
-.run-button.no-changes {
-  background: #f3f4f6;
-  color: #6b7280;
-  border: 1px solid #d1d5db;
-}
-
-.run-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-
 .editor-section {
   background: white;
   border-right: 1px solid #e5e7eb;
@@ -489,19 +296,6 @@ onMounted(async () => {
 .bottom-bar-left {
   display: flex;
   align-items: center;
-  gap: 1rem;
-}
-
-.runtime-versions {
-  font-size: 0.75rem;
-  color: #9ca3af;
-  font-family: monospace;
-  opacity: 0.7;
-  transition: opacity 0.2s ease;
-}
-
-.runtime-versions:hover {
-  opacity: 1;
 }
 
 .bottom-bar-right {
