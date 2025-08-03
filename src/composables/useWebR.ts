@@ -1,241 +1,261 @@
-import { ref, reactive } from "vue";
-import type { WebR, Shelter } from "webr";
-import type { WebRMessage, CsvData } from "@/types";
-import type { UseWebRReturn } from "@/types/state";
-import { createExecuteCodeFunction } from "./useWebRExecution";
+import { ref, reactive, computed, readonly } from 'vue'
+import type { Ref, ComputedRef } from 'vue'
+import type { WebRMessage, CsvData } from '@/types'
+import { 
+  WebRInstance, 
+  Executor, 
+  PackageManager, 
+  FileSystem,
+  cleanErrorMessage 
+} from '@/webr'
 
-export const useWebR = (): UseWebRReturn => {
-  const isReady = ref(false);
-  const isLoading = ref(false); // For code execution
-  const isInitializing = ref(false); // For WebR initialization
-  const loadingStatus = ref("");
-  const installedLibraries = reactive(new Set<string>());
-  const messages = reactive<WebRMessage[]>([]);
-  const packageVersions = reactive<Record<string, string>>({});
-  const webrVersion = ref<string>("");
-  const rVersion = ref<string>("");
+interface UseWebRReturn {
+  // State
+  messages: Readonly<WebRMessage[]>
+  isReady: Readonly<Ref<boolean>>
+  isLoading: Readonly<Ref<boolean>>
+  isInitializing: Readonly<Ref<boolean>>
+  loadingStatus: Readonly<Ref<string>>
+  webrVersion: ComputedRef<string>
+  rVersion: ComputedRef<string>
+  installedLibraries: Readonly<Set<string>>
+  packageVersions: Readonly<Record<string, string>>
+  
+  // Actions
+  initializeWebR: (initialCode?: string) => Promise<void>
+  executeCode: (code: string) => Promise<void>
+  uploadCsvData: (csvData: CsvData) => Promise<void>
+  toggleLibrary: (library: string, install: boolean) => Promise<void>
+  clearMessages: () => void
+  clearConsoleMessages: () => void
+  destroy: () => Promise<void>
+}
 
-  let webR: WebR | null = null;
-  let shelter: Shelter | null = null;
+/**
+ * Vue composable that wraps pure WebR modules with reactive state
+ */
+export function useWebR(): UseWebRReturn {
+  // Vue reactive state
+  const messages = reactive<WebRMessage[]>([])
+  const isReady = ref(false)
+  const isInitializing = ref(false)
+  const isExecuting = ref(false)
+  const isInstallingPackage = ref(false)
+  const isUploadingFile = ref(false)
+  const status = ref('')
+  const versions = ref({ r: '', webr: '' })
+  const installedPackages = reactive(new Set<string>())
+  const packageVersions = reactive<Record<string, string>>({})
+  const uploadedFiles = reactive<string[]>([])
+  const lastExecutionDuration = ref(0)
 
-  const addMessage = (type: WebRMessage["type"], content: string): void => {
-    messages.push({ type, content });
-  };
+  // Pure WebR instances (not reactive)
+  let instance: WebRInstance | null = null
+  let executor: Executor | null = null
+  let packages: PackageManager | null = null
+  let fileSystem: FileSystem | null = null
 
-  const clearMessages = (): void => {
-    messages.splice(0, messages.length);
-  };
+  // Helper to add messages
+  const addMessage = (type: WebRMessage['type'], content: string): void => {
+    messages.push({ type, content })
+  }
 
-  const clearConsoleMessages = (): void => {
-    // Remove only non-plot messages, keep charts visible during execution
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].type !== "plot") {
-        messages.splice(i, 1);
-      }
-    }
-  };
-
+  // Initialize WebR
   const initializeWebR = async (initialCode?: string): Promise<void> => {
+    if (instance?.isReady) return
+
     try {
-      isInitializing.value = true;
-      loadingStatus.value = "Initializing WebR...";
+      isInitializing.value = true
+      status.value = 'Loading WebR...'
 
-      // Import WebR from installed package
-      const { WebR } = await import("webr");
+      // Create and initialize WebR instance
+      instance = new WebRInstance()
+      status.value = 'Initializing WebR...'
+      
+      const versionInfo = await instance.initialize()
+      versions.value = versionInfo
 
-      // Initialize WebR with fallback channel types
-      try {
-        webR = new WebR({
-          interactive: false,
-          channelType: 0, // 0 = SharedArrayBuffer
-        });
-      } catch (_error) {
-        console.warn(
-          "SharedArrayBuffer not available, falling back to PostMessage"
-        );
-        webR = new WebR({
-          interactive: false,
-          channelType: 1, // 1 = PostMessage
-        });
+      // Create specialized modules
+      const webR = instance.getWebR()
+      const shelter = instance.getShelter()
+      
+      executor = new Executor(webR, shelter)
+      packages = new PackageManager(webR)
+      fileSystem = new FileSystem(webR)
+
+      // Install essential packages
+      status.value = 'Installing packages...'
+      const essentialPackages = await packages.installEssentials()
+      
+      // Update reactive state
+      essentialPackages.forEach(pkg => {
+        installedPackages.add(pkg.name)
+        if (pkg.version !== 'failed') {
+          packageVersions[pkg.name] = pkg.version
+        }
+      })
+
+      const essentialList = PackageManager.ESSENTIALS.join(', ')
+      addMessage('success', `WebR initialized with ${essentialList}`)
+      
+      isReady.value = true
+      status.value = 'Ready'
+
+      // Execute initial code if provided
+      if (initialCode?.trim()) {
+        await executeCode(initialCode)
       }
 
-      await webR.init();
-      shelter = await new webR.Shelter();
-
-      // Install packages one by one with status updates
-      const packages = ["ggplot2", "dplyr", "ggrepel"];
-      for (const pkg of packages) {
-        loadingStatus.value = `Installing ${pkg}...`;
-        await webR.installPackages([pkg]);
-        installedLibraries.add(pkg);
-      }
-
-      isReady.value = true;
-      loadingStatus.value = "WebR Ready";
-      addMessage(
-        "success",
-        "WebR initialized successfully with ggplot2, dplyr, and ggrepel"
-      );
-
-      // Query version information
-      await queryVersionInfo();
-
-      // Auto-execute initial code if provided
-      if (initialCode && initialCode.trim()) {
-        await executeCode(initialCode);
-      }
-    } catch (_error) {
-      loadingStatus.value = "WebR Failed";
-      addMessage("error", `Failed to initialize WebR: ${error}`);
+    } catch (error) {
+      status.value = 'Failed'
+      addMessage('error', `Initialization failed: ${cleanErrorMessage(error)}`)
+      throw error
     } finally {
-      isInitializing.value = false;
+      isInitializing.value = false
     }
-  };
+  }
 
+  // Execute R code
   const executeCode = async (code: string): Promise<void> => {
-    if (!webR || !shelter) {
-      addMessage("error", "WebR is not ready. Please wait for initialization.");
-      return;
+    if (!executor) {
+      addMessage('error', 'WebR not ready')
+      return
     }
 
     try {
-      isLoading.value = true;
-      const codeExecutor = createExecuteCodeFunction(
-        webR,
-        shelter,
-        isReady,
-        addMessage
-      );
-      await codeExecutor(code);
+      isExecuting.value = true
+      
+      const result = await executor.execute(code)
+      lastExecutionDuration.value = result.duration
+
+      // Add output messages
+      result.outputs.forEach(output => {
+        messages.push({ type: output.type, content: output.content })
+      })
+
+      // Add plot messages
+      result.plots.forEach(dataUrl => {
+        messages.push({ type: 'plot', content: dataUrl })
+      })
+
     } finally {
-      isLoading.value = false;
+      isExecuting.value = false
     }
-  };
+  }
 
+  // Upload CSV data
   const uploadCsvData = async (csvData: CsvData): Promise<void> => {
-    if (!webR || !isReady.value) {
-      addMessage("error", "WebR is not ready. Please wait for initialization.");
-      return;
+    if (!fileSystem) {
+      addMessage('error', 'WebR not ready')
+      return
     }
 
     try {
-      // Write the CSV content as a UTF-8 encoded file
-      const fileName = csvData.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-      const encoder = new TextEncoder();
-      const csvBytes = encoder.encode(csvData.content);
-      await webR.FS.writeFile(`/tmp/${fileName}`, csvBytes);
-
-      addMessage(
-        "success",
-        `CSV file '${fileName}' uploaded to /tmp/${fileName}`
-      );
-    } catch (_error) {
-      addMessage("error", `Failed to upload CSV: ${error}`);
+      isUploadingFile.value = true
+      
+      const { file, message } = await fileSystem.uploadAndLoad(
+        csvData.content,
+        csvData.name,
+        'data'
+      )
+      
+      uploadedFiles.push(file.name)
+      addMessage('success', `${csvData.name}: ${message}`)
+      
+    } catch (error) {
+      addMessage('error', cleanErrorMessage(error))
+    } finally {
+      isUploadingFile.value = false
     }
-  };
+  }
 
+  // Toggle library installation
   const toggleLibrary = async (library: string, install: boolean): Promise<void> => {
-    if (!webR) {
-      return;
+    if (!packages) {
+      addMessage('error', 'WebR not ready')
+      return
     }
 
     try {
       if (install) {
-        loadingStatus.value = `Installing ${library}...`;
-        isInitializing.value = true;
-        await webR.installPackages([library]);
-        installedLibraries.add(library);
-        addMessage("success", `${library} installed successfully`);
-      } else {
-        // Note: WebR doesn't support uninstalling packages
-        installedLibraries.delete(library);
-        addMessage("info", `${library} removed from available libraries`);
-      }
-    } catch (_error) {
-      addMessage("error", `Failed to install ${library}: ${error}`);
-    } finally {
-      isInitializing.value = false;
-      loadingStatus.value = isReady.value ? "WebR Ready" : loadingStatus.value;
-    }
-  };
-
-  const queryVersionInfo = async (): Promise<void> => {
-    if (!webR || !isReady.value) {
-      return;
-    }
-
-    // Query R version
-    try {
-      const rVersionResult = await webR.evalR("R.version.string");
-      const rVersionJs = await rVersionResult.toJs();
-      // Type guard to check if this is a character object with values
-      if (
-        rVersionJs && 
-        typeof rVersionJs === 'object' && 
-        'values' in rVersionJs && 
-        Array.isArray(rVersionJs.values) && 
-        rVersionJs.values.length > 0 &&
-        typeof rVersionJs.values[0] === 'string'
-      ) {
-        // Remove "R version" prefix to get clean version string
-        rVersion.value = rVersionJs.values[0].replace(/^R version /, "R ");
-      }
-    } catch (_error) {
-      // R version query is optional - fail silently
-    }
-
-    // Query WebR version (from package or webR object)
-    try {
-      // Try to get from webR object first, fallback to import meta
-      webrVersion.value = "0.5.4"; // We know this from package.json
-    } catch (_error) {
-      // WebR version query is optional - fail silently
-    }
-
-    // Query package versions
-    const packages = ["ggplot2", "dplyr", "ggrepel"];
-
-    for (const pkg of packages) {
-      if (installedLibraries.has(pkg)) {
-        try {
-          const result = await webR.evalR(
-            `as.character(packageVersion("${pkg}"))`
-          );
-          const jsResult = await result.toJs();
-
-          // Type guard to check if this is a character object with values
-          if (
-            jsResult && 
-            typeof jsResult === 'object' && 
-            'values' in jsResult && 
-            Array.isArray(jsResult.values) && 
-            jsResult.values.length > 0 &&
-            typeof jsResult.values[0] === 'string'
-          ) {
-            packageVersions[pkg] = jsResult.values[0];
-          }
-        } catch (_error) {
-          // Package version query is optional - fail silently
+        isInstallingPackage.value = true
+        const info = await packages.install(library)
+        
+        if (info.version !== 'failed') {
+          installedPackages.add(info.name)
+          packageVersions[info.name] = info.version
+          addMessage('success', `${library} (${info.version}) installed`)
+        } else {
+          addMessage('error', `Failed to install ${library}`)
         }
+      } else {
+        packages.removeFromTracking(library)
+        installedPackages.delete(library)
+        delete packageVersions[library]
+        addMessage('info', `${library} removed from tracking`)
+      }
+    } catch (error) {
+      addMessage('error', cleanErrorMessage(error))
+    } finally {
+      isInstallingPackage.value = false
+    }
+  }
+
+  // Clear messages
+  const clearMessages = (): void => {
+    messages.splice(0, messages.length)
+  }
+
+  // Clear console messages (keep plots)
+  const clearConsoleMessages = (): void => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].type !== 'plot') {
+        messages.splice(i, 1)
       }
     }
-  };
+  }
 
+  // Destroy WebR instance
+  const destroy = async (): Promise<void> => {
+    if (instance) {
+      await instance.destroy()
+      instance = null
+      executor = null
+      packages = null
+      fileSystem = null
+      isReady.value = false
+      status.value = 'Destroyed'
+    }
+  }
+
+  // Computed loading state
+  const isLoading = computed(() => 
+    isInitializing.value || 
+    isExecuting.value || 
+    isInstallingPackage.value || 
+    isUploadingFile.value
+  )
+
+  // Return public API with readonly state where appropriate
   return {
-    isReady,
-    isLoading,
-    isInitializing,
-    loadingStatus,
-    installedLibraries,
-    messages,
-    packageVersions,
-    webrVersion,
-    rVersion,
+    // State (readonly)
+    messages: readonly(messages),
+    isReady: readonly(isReady),
+    isLoading: readonly(isLoading),
+    isInitializing: readonly(isInitializing),
+    loadingStatus: readonly(status),
+    webrVersion: computed(() => versions.value.webr),
+    rVersion: computed(() => versions.value.r),
+    installedLibraries: readonly(installedPackages),
+    packageVersions: readonly(packageVersions),
+    
+    // Actions
     initializeWebR,
     executeCode,
     uploadCsvData,
+    toggleLibrary,
     clearMessages,
     clearConsoleMessages,
-    toggleLibrary,
-  };
-};
+    destroy,
+  }
+}

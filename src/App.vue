@@ -60,8 +60,6 @@ const handleFileUpload = async (csvData: CsvData): Promise<void> => {
 
 const handleFileRemoved = (): void => {
   currentCsvData.value = null
-  // Clear any data-related variables in R
-  void executeCode('if (exists("data")) rm(data)')
 }
 
 const handleExampleSelect = async (example: RExample): Promise<void> => {
