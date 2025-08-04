@@ -3,20 +3,20 @@ import type { RExample } from '@/types'
 export const examples: RExample[] = [
   {
     id: 'iris-petal-scatter',
-    title: 'Iris petal dimensions',
-    description: 'Explore the relationship between petal length and width across iris species',
+    title: 'Iris sepal dimensions',
+    description: 'Explore the relationship between sepal length and width across iris species',
     code: `library(ggplot2)
 
 # Load the classic iris dataset
 # Contains measurements for 150 iris flowers from 3 species
 data(iris)
 
-# Create scatter plot of petal dimensions
-ggplot(iris, aes(x = Petal.Length, y = Petal.Width, color = Species)) +
+# Create scatter plot of sepal dimensions
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
   geom_point(size = 3, alpha = 0.8) +
-  labs(title = "Iris Petal Dimensions by Species",
-       x = "Petal Length (cm)",
-       y = "Petal Width (cm)") +
+  labs(title = "Iris Sepal Dimensions by Species",
+       x = "Sepal Length (cm)",
+       y = "Sepal Width (cm)") +
   theme_minimal() +
   theme(legend.position = "bottom")`,
   },
