@@ -84,8 +84,12 @@ export class WebRInstance {
       // Simplify version string: "R version 4.3.1 ..." -> "R 4.3.1"
       const rVersion = fullVersion.replace(/^R version /, 'R ')
       
-      // WebR version detection would go here if available in future
-      return { r: rVersion, webr: '' }
+      // Get WebR version from the instance
+      const webrVersion = webR.version
+      if (!webrVersion) {
+        throw new WebRError('WebR instance does not provide version information')
+      }
+      return { r: rVersion, webr: webrVersion }
     } catch {
       return { r: 'Unknown', webr: '' }
     }

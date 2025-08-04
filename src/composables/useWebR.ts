@@ -15,6 +15,7 @@ interface UseWebRReturn {
   isReady: Readonly<Ref<boolean>>
   isLoading: Readonly<Ref<boolean>>
   isInitializing: Readonly<Ref<boolean>>
+  isExecuting: Readonly<Ref<boolean>>
   loadingStatus: Readonly<Ref<string>>
   webrVersion: ComputedRef<string>
   rVersion: ComputedRef<string>
@@ -243,6 +244,7 @@ export function useWebR(): UseWebRReturn {
     isReady: readonly(isReady),
     isLoading: readonly(isLoading),
     isInitializing: readonly(isInitializing),
+    isExecuting: readonly(isExecuting),
     loadingStatus: readonly(status),
     webrVersion: computed(() => versions.value.webr),
     rVersion: computed(() => versions.value.r),

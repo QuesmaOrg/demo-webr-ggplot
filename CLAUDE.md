@@ -8,6 +8,7 @@
 
 - NEVER fail silently - always log errors and make failures visible to users when appropriate.
 - If a composable is used within only one Vue component, keep it in that component file - do NOT create a separate composable file.
+- AVOID defensive code with multiple fallbacks - choose ONE approach, implement it properly, and fail hard with clear errors if it doesn't work. Multiple fallbacks hide real problems and make debugging harder.
 
 ## WebR Documentation References
 

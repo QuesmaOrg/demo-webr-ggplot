@@ -5,6 +5,7 @@ import type { WebRMessage } from '@/types'
 interface Props {
   messages: WebRMessage[]
   isLoading: boolean
+  isExecuting: boolean
   showConsoleBelow?: boolean
 }
 
@@ -71,9 +72,9 @@ watch(
         >
       </div>
       
-      <!-- Loading overlay -->
+      <!-- Loading overlay - only show during actual code execution -->
       <div
-        v-if="isLoading"
+        v-if="isExecuting"
         class="loading-overlay"
       >
         <div class="loading-content">

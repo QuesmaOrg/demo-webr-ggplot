@@ -26,6 +26,7 @@ const {
   isReady,
   isLoading,
   isInitializing,
+  isExecuting,
   loadingStatus,
   installedLibraries,
   messages,
@@ -181,6 +182,7 @@ onMounted(async () => {
           <OutputDisplay
             :messages="messages"
             :is-loading="isLoading"
+            :is-executing="isExecuting"
           />
           <ConsoleOutput 
             ref="consoleRef"
