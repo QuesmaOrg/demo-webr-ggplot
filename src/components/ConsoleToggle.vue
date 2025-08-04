@@ -20,12 +20,38 @@ const textMessages = computed(() => {
   return props.messages.filter(message => message.type !== 'plot')
 })
 
+const errorCount = computed(() => {
+  return textMessages.value.filter(msg => msg.type === 'error' || msg.type === 'stderr').length
+})
+
+const infoCount = computed(() => {
+  return textMessages.value.filter(msg => 
+    msg.type === 'stdout' || msg.type === 'info' || msg.type === 'success'
+  ).length
+})
+
+const warningCount = computed(() => {
+  return textMessages.value.filter(msg => msg.type === 'warning').length
+})
+
 const hasErrors = computed(() => {
-  return textMessages.value.some(msg => msg.type === 'error' || msg.type === 'stderr')
+  return errorCount.value > 0
 })
 
 const hasWarnings = computed(() => {
-  return textMessages.value.some(msg => msg.type === 'warning')
+  return warningCount.value > 0
+})
+
+const buttonText = computed(() => {
+  if (props.isLoading) return 'Running...'
+  
+  const parts = []
+  if (infoCount.value > 0) parts.push(`${infoCount.value} info`)
+  if (warningCount.value > 0) parts.push(`${warningCount.value} warning${warningCount.value > 1 ? 's' : ''}`)
+  if (errorCount.value > 0) parts.push(`${errorCount.value} error${errorCount.value > 1 ? 's' : ''}`)
+  
+  if (parts.length === 0) return 'Console (empty)'
+  return `Console: ${parts.join(', ')}`
 })
 
 const toggleConsole = (): void => {
@@ -46,7 +72,7 @@ const toggleConsole = (): void => {
     :disabled="isLoading"
     @click="toggleConsole"
   >
-    {{ isLoading ? 'Running...' : `Console (${textMessages.length})` }}
+    {{ buttonText }}
     <span
       v-if="!isLoading"
       class="toggle-arrow"
