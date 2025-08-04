@@ -2,93 +2,94 @@ import type { RExample } from '@/types'
 
 export const examples: RExample[] = [
   {
-    id: 'car-weight-mpg',
-    title: 'Car weight vs fuel efficiency',
-    description: 'Heavier cars consume more fuel - classic automotive relationship',
+    id: 'iris-petal-scatter',
+    title: 'Iris petal dimensions',
+    description: 'Explore the relationship between petal length and width across iris species',
     code: `library(ggplot2)
 
-# Load built-in R dataset about car characteristics
-# Contains data on 32 car models from 1973-74
-data(mtcars)
-ggplot(mtcars, aes(x = wt, y = mpg)) +
-  geom_point() +
-  labs(title = "Car Weight vs Fuel Efficiency",
-       x = "Weight (1000 lbs)",
-       y = "Miles per Gallon") +
-  theme_minimal()`,
-  },
-  {
-    id: 'cylinders-matter',
-    title: 'Why cylinder count matters',
-    description: 'Engine cylinders affect both weight and fuel efficiency',
-    code: `library(ggplot2)
+# Load the classic iris dataset
+# Contains measurements for 150 iris flowers from 3 species
+data(iris)
 
-# Load built-in dataset
-# Visualize multiple variables: weight, mpg, and cylinder count
-data(mtcars)
-ggplot(mtcars, aes(x = wt, y = mpg, color = factor(cyl))) +
-  geom_point(size = 3, alpha = 0.7) +
-  geom_smooth(method = "lm", se = FALSE) +
-  scale_color_manual(values = c("4" = "#E31A1C", "6" = "#1F78B4", "8" = "#33A02C")) +
-  labs(title = "Car Weight vs MPG by Cylinder Count",
-       x = "Weight (1000 lbs)",
-       y = "Miles per Gallon",
-       color = "Cylinders") +
+# Create scatter plot of petal dimensions
+ggplot(iris, aes(x = Petal.Length, y = Petal.Width, color = Species)) +
+  geom_point(size = 3, alpha = 0.8) +
+  labs(title = "Iris Petal Dimensions by Species",
+       x = "Petal Length (cm)",
+       y = "Petal Width (cm)") +
   theme_minimal() +
   theme(legend.position = "bottom")`,
   },
   {
-    id: 'efficient-cars-only',
-    title: 'Focus on efficient cars',
-    description: 'What makes fuel-efficient cars special?',
-    code: `library(dplyr)
-library(ggplot2)
+    id: 'kawaii-iris',
+    title: 'Kawaii-style iris visualization',
+    description: 'A playful, pastel visualization of iris sepal dimensions',
+    code: `library(ggplot2)
 
-# Load built-in dataset
-# Filter cars with good fuel efficiency and summarize by cylinders
-data(mtcars)
-mtcars_summary <- mtcars %>%
-  filter(mpg > 20) %>%
-  group_by(cyl) %>%
-  summarize(
-    avg_mpg = mean(mpg),
-    count = n(),
-    .groups = 'drop'
-  )
+# Load iris dataset for a cute visualization
+data(iris)
 
-# Visualize the summary
-ggplot(mtcars_summary, aes(x = factor(cyl), y = avg_mpg)) +
-  geom_col(fill = "steelblue") +
-  geom_text(aes(label = paste("n =", count)), vjust = -0.5) +
-  labs(title = "Average MPG by Cylinder Count (Efficient Cars Only)",
-       x = "Number of Cylinders",
-       y = "Average MPG") +
-  theme_minimal()`,
+# Create a simple kawaii-style plot  
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+  # Use flower-shaped points
+  geom_point(size = 8, shape = 8, stroke = 2, alpha = 0.9) +
+  # Simple pastel kawaii colors
+  scale_color_manual(values = c("setosa" = "#FF69B4",      # Hot pink
+                                "versicolor" = "#DDA0DD",   # Plum  
+                                "virginica" = "#87CEEB")) + # Sky blue
+  # Add cute title and labels
+  labs(title = "✿ Kawaii Iris Garden ✿",
+       x = "Sepal Length ♡",
+       y = "Sepal Width ♡") +
+  # Simple kawaii theme
+  theme_minimal() +
+  theme(
+    plot.background = element_rect(fill = "#FFF0F5", color = NA),
+    panel.background = element_rect(fill = "#FFFAFA", color = NA),
+    panel.grid = element_line(color = "#FFE0F0", size = 0.3),
+    text = element_text(color = "#FF1493"),
+    plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+    legend.position = "bottom",
+    legend.background = element_blank(),
+    legend.key = element_blank(),
+    axis.text = element_text(color = "#FF69B4"),
+    axis.title = element_text(face = "bold")
+  )`,
   },
   {
-    id: 'manual-vs-automatic',
-    title: 'Manual vs automatic transmission',
-    description: 'Do manual transmissions really save fuel?',
-    code: `library(dplyr)
-library(ggplot2)
+    id: 'iris-violin-panels',
+    title: 'Iris measurements distribution',
+    description: 'Violin plots showing distribution of all iris measurements in a 2x2 panel',
+    code: `library(ggplot2)
+library(tidyr)
 
-# Load built-in dataset
-# Create grouped bar chart showing gears vs transmission type
-data(mtcars)
-gear_summary <- mtcars %>%
-  group_by(gear, am) %>%
-  summarize(count = n(), .groups = 'drop') %>%
-  mutate(transmission = ifelse(am == 0, "Automatic", "Manual"))
+# Load iris dataset
+data(iris)
 
-ggplot(gear_summary, aes(x = factor(gear), y = count, fill = transmission)) +
-  geom_col(position = "dodge") +
-  scale_fill_manual(values = c("Automatic" = "#FF7F00", "Manual" = "#1F78B4")) +
-  labs(title = "Cars by Gear Count and Transmission Type",
-       x = "Number of Gears",
-       y = "Count",
-       fill = "Transmission") +
+# Reshape data to long format for faceting
+iris_long <- iris %>%
+  pivot_longer(cols = -Species, 
+               names_to = "Measurement", 
+               values_to = "Value")
+
+# Create 2x2 panel of violin plots
+ggplot(iris_long, aes(x = Species, y = Value, fill = Species)) +
+  geom_violin(alpha = 0.7, scale = "width", trim = FALSE) +
+  facet_wrap(~ Measurement, scales = "free_y", ncol = 2) +
+  scale_fill_manual(values = c("setosa" = "#FF7F50", 
+                               "versicolor" = "#9370DB", 
+                               "virginica" = "#20B2AA")) +
+  labs(title = "Distribution of Iris Measurements",
+       subtitle = "Violin plots showing the distribution and density of each measurement",
+       x = NULL,
+       y = "Measurement (cm)") +
   theme_minimal() +
-  theme(legend.position = "bottom")`,
+  theme(
+    legend.position = "none",
+    strip.text = element_text(face = "bold", size = 12),
+    strip.background = element_rect(fill = "#F0F0F0", color = NA),
+    panel.spacing = unit(1, "lines")
+  )`,
   },
   {
     id: 'metal-bands-happiness',
@@ -114,92 +115,13 @@ ggplot(data, aes(x = Metal.bands.per.capita, y = Score, label = Country.or.regio
   theme_minimal()`,
   },
   {
-    id: 'global-warming',
-    title: 'Global warming evidence',
-    description: 'Temperature rise over the past decades',
-    csvUrl: '/global_temperature.csv',
-    code: `library(ggplot2)
-
-# Load global temperature time series data
-data <- read.csv("/tmp/global_temperature.csv", stringsAsFactors = FALSE)
-
-# Create time series visualization with trend line
-ggplot(data, aes(x = year)) +
-  geom_line(aes(y = temperature_celsius), color = "#e74c3c", size = 1.5) +
-  geom_point(aes(y = temperature_celsius), color = "#c0392b", size = 2) +
-  geom_smooth(aes(y = temperature_celsius), method = "loess", se = TRUE, 
-              color = "#e74c3c", alpha = 0.2) +
-  labs(title = "Global Temperature Trend (2000-2020)",
-       x = "Year",
-       y = "Temperature (°C)",
-       caption = "Data: Global temperature measurements") +
-  theme_minimal()`,
-  },
-  {
-    id: 'startup-gold-rush',
-    title: 'The startup gold rush',
-    description: 'Which sectors attract the most venture capital?',
-    csvUrl: '/startup_funding.csv',
-    code: `library(dplyr)
-library(ggplot2)
-
-# Load startup funding data
-data <- read.csv("/tmp/startup_funding.csv", stringsAsFactors = FALSE)
-
-# Explore the data structure
-head(data)
-
-# Summarize funding by sector
-sector_summary <- data %>%
-  group_by(sector) %>%
-  summarise(
-    total_funding = sum(funding_amount_usd),
-    avg_funding = mean(funding_amount_usd),
-    count = n(),
-    .groups = 'drop'
-  ) %>%
-  arrange(desc(total_funding))
-
-print(sector_summary)
-
-# Create horizontal bar chart
-ggplot(sector_summary, aes(x = reorder(sector, total_funding), 
-                          y = total_funding / 1e6, fill = sector)) +
-  geom_col(show.legend = FALSE) +
-  coord_flip() +
-  labs(title = "Total Startup Funding by Sector",
-       x = "Sector",
-       y = "Funding Amount (Million USD)") +
-  theme_minimal()`,
-  },
-  {
     id: 'custom-csv-template',
     title: 'Your CSV template',
     description: 'Starting point for analyzing your own data',
-    code: `library(dplyr)
-library(ggplot2)
+    code: `library(ggplot2)
 
-# TO USE YOUR OWN DATA:
-# 1. Upload your CSV file using the interface above
-# 2. Replace the filename below with your actual filename
-# data <- read.csv("/tmp/your_filename.csv", stringsAsFactors = FALSE)
-
-# For demonstration, load iris - built-in dataset with flower measurements
-# iris contains 150 observations of 3 species with 4 measurements each
-data(iris)
-data <- iris
-
-# Explore your data structure
-str(data)      # Show data types and structure
-head(data)     # Show first 6 rows
-summary(data)  # Show statistical summary
-
-# Example scatter plot - modify based on your columns
-ggplot(data, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
-  geom_point(size = 3, alpha = 0.7) +
-  labs(title = "Your Data Visualization",
-       x = "X Variable",
-       y = "Y Variable") +
-  theme_minimal()`,
+# Upload your CSV file using the button above
+# Then change "your_filename.csv" to your actual filename and press Run
+data <- read.csv("/tmp/your_filename.csv", stringsAsFactors = FALSE)`,
   },
 ]

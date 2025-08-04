@@ -12,7 +12,7 @@ export class PackageManager {
   private versions = new Map<string, string>()
   
   // Essential packages for ggplot2 demos
-  static readonly ESSENTIALS = ['ggplot2', 'dplyr', 'ggrepel'] as const
+  static readonly ESSENTIALS = ['ggplot2', 'dplyr', 'ggrepel', 'tidyr'] as const
 
   constructor(private webR: WebR) {}
 
