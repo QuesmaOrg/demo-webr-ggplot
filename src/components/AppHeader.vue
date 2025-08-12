@@ -57,7 +57,7 @@ onMounted(() => {
             href="https://quesma.com/blog-detail/sandboxing-ai-generated-code-why-we-moved-from-webr-to-aws-lambda"
             target="_blank"
             class="subtitle-link"
-          >why we moved from WebR to AWS Lambda</a>)
+          >a bit more context</a>)
         </p>
       </div>
       <a

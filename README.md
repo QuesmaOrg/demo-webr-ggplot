@@ -1,18 +1,19 @@
 # WebR ggplot2 Demo
 
-Interactive R data visualization in the browser using [WebR](https://webr.r-wasm.org/), [ggplot2](https://ggplot2.tidyverse.org/), and Vue.js.
+Interactive R data visualization in the browser using [WebR](https://webr.r-wasm.org/) (R in WebAssembly) and [ggplot2](https://ggplot2.tidyverse.org/) (the best charting library ever).
 
 ## What is it?
 
 A web application that runs R code directly in your browser - no server required. Features live code editing, CSV upload, and interactive plots. Try it online at [quesmaorg.github.io/demo-webr-ggplot](https://quesmaorg.github.io/demo-webr-ggplot/).
 
-Read about [why we moved from WebR to AWS Lambda](https://quesma.com/blog-detail/sandboxing-ai-generated-code-why-we-moved-from-webr-to-aws-lambda) for sandboxing AI-generated code.
+For more context, see [our recent blog post on sandboxing AI-generated code](https://quesma.com/blog-detail/sandboxing-ai-generated-code-why-we-moved-from-webr-to-aws-lambda).
 
-MIT License. Developed by [Piotr Migdal](https://p.migdal.pl/) from [Quesma](https://quesma.com/).
+MIT License. Vibe-coded by [Piotr Migdał](https://p.migdal.pl/) from [Quesma](https://quesma.com/).
 
 ## Installation
 
 Prerequisites:
+
 - Node.js 18+
 - [pnpm](https://pnpm.io/)
 
