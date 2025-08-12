@@ -52,7 +52,12 @@ onMounted(() => {
           WebR ggplot2 & dplyr Demo
         </h1>
         <p class="subtitle">
-          Interactive R data visualization and manipulation in the browser
+          Interactive R data viz entirely in your browser 
+          (<a
+            href="https://quesma.com/blog-detail/sandboxing-ai-generated-code-why-we-moved-from-webr-to-aws-lambda"
+            target="_blank"
+            class="subtitle-link"
+          >why we moved from WebR to AWS Lambda</a>)
         </p>
       </div>
       <a
@@ -171,5 +176,15 @@ onMounted(() => {
   width: 14px;
   height: 14px;
   color: #fbbf24;
+}
+
+.subtitle-link {
+  color: white;
+  text-decoration: underline;
+  opacity: 0.9;
+}
+
+.subtitle-link:hover {
+  opacity: 1;
 }
 </style>
