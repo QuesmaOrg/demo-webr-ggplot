@@ -2,6 +2,8 @@
 
 Interactive R data visualization in the browser using [WebR](https://webr.r-wasm.org/) (R in WebAssembly) and [ggplot2](https://ggplot2.tidyverse.org/) (the best charting library ever).
 
+![WebR ggplot2 Demo Screenshot](./public/webr-ggplot2-screenshot.png)
+
 ## What is it?
 
 A web application that runs R code directly in your browser - no server required. Features live code editing, CSV upload, and interactive plots. Try it online at [quesmaorg.github.io/demo-webr-ggplot](https://quesmaorg.github.io/demo-webr-ggplot/).
