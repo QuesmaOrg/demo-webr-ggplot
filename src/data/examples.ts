@@ -95,7 +95,7 @@ ggplot(iris_long, aes(x = Species, y = Value, fill = Species)) +
     id: 'metal-bands-happiness',
     title: 'Metal bands vs happiness',
     description: 'Surprising correlation: more metal bands = happier countries',
-    csvUrl: '/metal_bands_happiness.csv',
+    csvUrl: './metal_bands_happiness.csv',
     code: `library(ggplot2)
 library(ggrepel)
 

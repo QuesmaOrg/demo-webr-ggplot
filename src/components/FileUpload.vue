@@ -264,6 +264,10 @@ onUnmounted(() => {
               </span>
             </div>
           </div>
+          <div class="code-section">
+            <span class="code-header">Load in R:</span>
+            <code class="code-snippet">data &lt;- read.csv("/tmp/{{ props.uploadedFile.name }}")</code>
+          </div>
         </div>
       </div>
     </div>
@@ -491,6 +495,31 @@ onUnmounted(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+
+.code-section {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.code-header {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.code-snippet {
+  display: block;
+  background: #f3f4f6;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.8125rem;
+  color: #1f2937;
+  word-break: break-all;
 }
 
 .column-name {
