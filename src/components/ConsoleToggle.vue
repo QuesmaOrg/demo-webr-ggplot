@@ -137,10 +137,9 @@ const toggleConsole = (): void => {
 
 @media (max-width: 768px) {
   .console-toggle {
-    min-height: 44px;
-    font-size: 16px; /* Prevents zoom on iOS */
-    flex: 1;
-    justify-content: center;
+    min-height: 36px;
+    font-size: 0.875rem;
+    padding: 0.5rem 0.625rem;
   }
 }
 </style>

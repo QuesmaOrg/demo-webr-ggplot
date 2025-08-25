@@ -192,18 +192,17 @@ onUnmounted(() => {
           style="display: none;"
           @change="handleFileSelect"
         >
-        <span class="drop-text">Drop CSV here</span>
         <button
           class="thin-btn"
           @click="fileInputRef?.click()"
         >
-          or upload file
+          Upload file
         </button>
         <button
           class="thin-btn"
           @click="showUrlInput = true"
         >
-          or load from URL
+          Load from URL
         </button>
       </div>
     </div>
@@ -279,21 +278,18 @@ onUnmounted(() => {
   position: relative;
   display: flex;
   align-items: center;
-  min-width: 0;
-  flex: 1;
 }
 
 .csv-drop-zone {
   background: #fafafa;
   border: 2px dashed #d1d5db;
   border-radius: 6px;
-  padding: 0.5rem 0.75rem;
+  padding: 0.375rem 0.5rem;
   transition: all 0.3s ease;
-  min-height: 38px;
+  min-height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
 }
 
 .csv-drop-zone:hover {
@@ -311,22 +307,15 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  font-size: 0.875rem;
-}
-
-.drop-text {
-  color: #000000;
-  font-size: 0.875rem;
-  margin-right: 0.25rem;
 }
 
 .thin-btn {
-  background: none;
+  background: white;
   border: 1px solid #d1d5db;
   border-radius: 4px;
-  padding: 0.25rem 0.5rem;
+  padding: 0.25rem 0.375rem;
   font-size: 0.75rem;
-  color: #3b82f6;
+  color: #6b7280;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -536,36 +525,24 @@ onUnmounted(() => {
 
 /* Mobile styles */
 @media (max-width: 768px) {
-  .file-upload {
-    width: 100%;
-  }
-  
   .csv-drop-zone {
-    min-height: 44px;
-    padding: 0.625rem;
+    min-height: 28px;
+    padding: 0.25rem 0.375rem;
+    border-radius: 4px;
   }
   
   .csv-options {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-  
-  .drop-text {
-    display: none;
+    gap: 0.25rem;
   }
   
   .thin-btn {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.875rem;
-    min-height: 36px;
+    padding: 0.125rem 0.25rem;
+    font-size: 0.625rem;
   }
   
   .csv-button {
-    width: 100%;
-    justify-content: space-between;
-    min-height: 44px;
-    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.25rem 0.375rem;
+    font-size: 0.75rem;
   }
   
   .csv-dropdown {
@@ -576,16 +553,8 @@ onUnmounted(() => {
   
   .url-input {
     font-size: 16px; /* Prevents zoom on iOS */
-  }
-}
-
-@media (max-width: 480px) {
-  .csv-options {
-    width: 100%;
-  }
-  
-  .thin-btn {
-    flex: 1;
+    padding: 0.25rem 0.375rem;
+    min-height: 24px;
   }
 }
 </style>

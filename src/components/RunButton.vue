@@ -97,13 +97,13 @@ const handleClick = (): void => {
 
 @media (max-width: 768px) {
   .run-section {
-    width: 100%;
+    gap: 0.5rem;
   }
   
   .run-button {
-    min-height: 44px;
-    font-size: 16px; /* Prevents zoom on iOS */
-    flex: 1;
+    min-height: 36px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
   }
   
   .runtime-versions {

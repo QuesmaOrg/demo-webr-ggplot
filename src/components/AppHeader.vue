@@ -194,26 +194,32 @@ onMounted(() => {
 /* Mobile adjustments */
 @media (max-width: 768px) {
   .header {
-    padding: 0.75rem;
+    padding: 0.5rem;
   }
   
   .header-content {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
   }
   
-  .github-link {
-    align-self: stretch;
-    justify-content: center;
+  .title {
+    font-size: 1.125rem;
+    margin-bottom: 0;
   }
   
-  .github-text {
+  .subtitle {
     display: none;
   }
   
+  .github-link {
+    margin-left: auto;
+    padding: 0.375rem 0.5rem;
+  }
+  
+  .github-text,
   .github-stars {
-    padding-left: 0.5rem;
+    display: none;
   }
 }
 

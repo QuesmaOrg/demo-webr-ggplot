@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 interface Props {
   installedLibraries: Set<string>
@@ -25,8 +25,6 @@ const availableLibraries = [
   { name: 'lubridate', description: 'Work with dates and times easily' },
   { name: 'zoo', description: 'Handle irregular time series data' }
 ]
-
-const installedCount = computed(() => props.installedLibraries.size)
 
 const handleToggle = (library: string, event: Event): void => {
   const target = event.target as HTMLInputElement
@@ -67,8 +65,10 @@ onUnmounted(() => {
       :class="{ 'disabled': isLoading }"
       @click="toggleDropdown"
     >
-      <span class="libraries-icon">📚</span>
-      <span class="libraries-text">Libraries ({{ installedCount }})</span>
+      <span class="libraries-text">
+        <span v-if="isLoading">WebR...</span>
+        <span v-else>WebR ✓</span>
+      </span>
       <span
         class="dropdown-arrow"
         :class="{ 'open': isOpen }"
@@ -241,5 +241,35 @@ onUnmounted(() => {
 .library-desc {
   font-size: 0.75rem;
   color: #6b7280;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .libraries-button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    min-height: 24px;
+    border-radius: 4px;
+    gap: 0.25rem;
+    margin-left: auto;
+  }
+  
+  .libraries-text {
+    font-weight: 600;
+    color: #10b981;
+  }
+  
+  .libraries-text span:first-child {
+    color: #6b7280;
+  }
+  
+  .dropdown-arrow {
+    font-size: 0.625rem;
+  }
+  
+  .libraries-dropdown {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
 }
 </style>

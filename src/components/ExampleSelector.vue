@@ -74,13 +74,15 @@ const handleExampleChange = (): void => {
 
 @media (max-width: 768px) {
   .example-selector {
-    width: 100%;
+    flex: 1;
   }
   
   .select {
     max-width: none;
-    min-height: 44px;
-    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 32px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8125rem;
+    border-radius: 4px;
   }
 }
 </style>

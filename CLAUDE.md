@@ -57,3 +57,4 @@ Always reference the official WebR documentation when working with WebR features
 - AVOID patterns like `export type WebRInstance = any` - these mask real type safety issues
 - AVOID creating type aliases that just re-export types - import directly instead
 - ALL functions must have explicit return types - this is enforced by ESLint rules
+- While it is mostly a website for desktop, it should be also usable on mobile.

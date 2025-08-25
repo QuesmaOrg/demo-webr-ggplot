@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import CodeEditor from './components/CodeEditor.vue'
 import FileUpload from './components/FileUpload.vue'
 import ExampleSelector from './components/ExampleSelector.vue'
@@ -18,6 +18,21 @@ import type { RExample, CsvData } from './types'
 const code = ref(examples[0].code)
 const lastExecutedCode = ref('')
 const hasChanges = computed(() => code.value !== lastExecutedCode.value)
+
+// Mobile state
+const activePanel = ref<'code' | 'chart'>('code')
+const windowWidth = ref(window.innerWidth)
+const isMobile = computed(() => windowWidth.value < 768)
+
+// Update width on resize
+const updateWidth = (): void => {
+  windowWidth.value = window.innerWidth
+}
+
+// Lifecycle hooks
+onUnmounted(() => {
+  window.removeEventListener('resize', updateWidth)
+})
 
 // Current CSV data state
 const currentCsvData = ref<CsvData | null>(null)
@@ -133,6 +148,9 @@ const handleExampleSelect = async (example: RExample): Promise<void> => {
 }
 
 onMounted(async () => {
+  // Add resize listener
+  window.addEventListener('resize', updateWidth)
+  
   // Initialize WebR first
   await initializeWebR('')
   
@@ -148,7 +166,30 @@ onMounted(async () => {
     <AppHeader />
 
     <main class="main">
-      <div class="toolbar">
+      <!-- Mobile toolbar -->
+      <div
+        v-if="isMobile"
+        class="mobile-toolbar"
+      >
+        <FileUpload 
+          :uploaded-file="currentCsvData"
+          @file-uploaded="handleFileUpload" 
+          @file-removed="handleFileRemoved" 
+        />
+        <ExampleSelector @example-selected="handleExampleSelect" />
+        <LibrarySelector 
+          :installed-libraries="installedLibraries" 
+          :is-loading="isInitializing"
+          :package-versions="packageVersions"
+          @toggle-library="toggleLibrary"
+        />
+      </div>
+
+      <!-- Desktop toolbar -->
+      <div
+        v-else
+        class="toolbar"
+      >
         <div class="toolbar-left">
           <FileUpload 
             :uploaded-file="currentCsvData"
@@ -173,7 +214,57 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div class="container">
+      <!-- Mobile split view with glimpse -->
+      <div
+        v-if="isMobile"
+        class="mobile-container"
+      >
+        <div 
+          class="panel-wrapper code-panel"
+          :class="{ active: activePanel === 'code', collapsed: activePanel === 'chart' }"
+          @click="activePanel === 'chart' ? activePanel = 'code' : null"
+        >
+          <div
+            v-show="activePanel === 'chart'"
+            class="panel-label"
+          >
+            CODE
+          </div>
+          <div class="panel-content-wrapper">
+            <CodeEditor v-model="code" />
+          </div>
+        </div>
+
+        <div 
+          class="panel-wrapper chart-panel"
+          :class="{ active: activePanel === 'chart', collapsed: activePanel === 'code' }"
+          @click="activePanel === 'code' ? activePanel = 'chart' : null"
+        >
+          <div
+            v-show="activePanel === 'code'"
+            class="panel-label"
+          >
+            CHART
+          </div>
+          <div class="panel-content-wrapper">
+            <OutputDisplay
+              :messages="messages"
+              :is-loading="isLoading"
+              :is-executing="isExecuting"
+            />
+            <ConsoleOutput 
+              ref="consoleRef"
+              :messages="messages"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Desktop view -->
+      <div
+        v-else
+        class="container"
+      >
         <div class="editor-section">
           <CodeEditor v-model="code" />
         </div>
@@ -233,6 +324,92 @@ onMounted(async () => {
   min-height: 0;
 }
 
+/* Mobile toolbar */
+.mobile-toolbar {
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+  height: 32px;
+}
+
+
+/* Mobile split view */
+.mobile-container {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.panel-wrapper {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.panel-wrapper.active {
+  flex: 1;
+}
+
+.panel-wrapper.collapsed {
+  width: 80px;
+  flex-shrink: 0;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.panel-wrapper.collapsed:first-child {
+  border-right: 1px solid #e5e7eb;
+}
+
+.panel-wrapper.collapsed:last-child {
+  border-left: 1px solid #e5e7eb;
+}
+
+.panel-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 0.375rem 0.75rem;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.panel-content-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: calc(100vw - 80px);
+  overflow: hidden;
+}
+
+.panel-wrapper.active .panel-content-wrapper {
+  opacity: 1;
+  overflow: auto;
+}
+
+.panel-wrapper.collapsed .panel-content-wrapper {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* Desktop toolbar */
 .toolbar {
   background: white;
   border-bottom: 1px solid #e5e7eb;
@@ -240,25 +417,23 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
   gap: 1rem;
-  flex-wrap: wrap;
 }
 
 .toolbar-left {
   display: flex;
   gap: 0.75rem;
   align-items: center;
-  flex-wrap: wrap;
 }
 
 .toolbar-right {
   display: flex;
   gap: 0.75rem;
   align-items: center;
-  flex-wrap: wrap;
 }
+
+
 
 .container {
   flex: 1;
@@ -291,12 +466,12 @@ onMounted(async () => {
 .bottom-bar {
   background: white;
   border-top: 1px solid #e5e7eb;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
-  min-height: 52px;
+  box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.05);
+  min-height: 48px;
   flex-shrink: 0;
   gap: 1rem;
 }
@@ -324,36 +499,44 @@ onMounted(async () => {
 
 /* Mobile styles */
 @media (max-width: 768px) {
-  .toolbar {
-    padding: 0.5rem;
-    gap: 0.5rem;
+  .mobile-toolbar {
+    display: flex;
   }
   
-  .toolbar-left,
-  .toolbar-right {
-    width: 100%;
-    justify-content: space-between;
-    gap: 0.5rem;
+  .mobile-container {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+  }
+  
+  .toolbar {
+    display: none;
   }
   
   .container {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr;
-  }
-  
-  .editor-section {
-    border-right: none;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 0.5rem;
-  }
-  
-  .output-section {
-    min-height: 40vh;
+    display: none;
   }
   
   .bottom-bar {
-    padding: 0.5rem;
-    min-height: 48px;
+    padding: 0.25rem 0.5rem;
+    min-height: 36px;
+    box-shadow: 0 -1px 1px rgba(0, 0, 0, 0.05);
+  }
+  
+  .panel-wrapper {
+    min-height: 0;
+    height: 100%;
+  }
+  
+  .panel-wrapper.active {
+    width: calc(100% - 80px);
+    flex: none;
+  }
+  
+  .code-panel .panel-content-wrapper,
+  .chart-panel .panel-content-wrapper {
+    height: 100%;
   }
 }
 
@@ -363,15 +546,21 @@ onMounted(async () => {
     height: 100vh;
   }
   
-  .container {
-    display: flex;
-    flex-direction: column;
+  .panel-wrapper.collapsed {
+    width: 50px; /* Even smaller on very narrow screens */
   }
   
-  .editor-section,
-  .output-section {
-    flex: 1;
-    min-height: 0;
+  .panel-wrapper.active {
+    width: calc(100% - 50px);
+  }
+  
+  .panel-content-wrapper {
+    width: calc(100vw - 50px); /* Adjust for smaller collapsed width */
+  }
+  
+  .panel-label {
+    font-size: 0.625rem;
+    padding: 0.25rem 0.375rem;
   }
 }
 </style>

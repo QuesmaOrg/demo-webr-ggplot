@@ -127,10 +127,26 @@ onUnmounted(() => {
   border: none;
   border-radius: 0;
   overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .editor-container {
   height: 100%;
   width: 100%;
+  min-height: 300px;
+}
+
+@media (max-width: 768px) {
+  .code-editor {
+    height: 100%;
+    width: 100%;
+  }
+  
+  .editor-container {
+    min-height: 100%;
+    width: 100%;
+  }
 }
 </style>
