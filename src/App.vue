@@ -230,29 +230,34 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-height: 0;
 }
 
 .toolbar {
   background: white;
   border-bottom: 1px solid #e5e7eb;
-  padding: 1rem 2rem;
+  padding: 0.75rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .toolbar-left {
   display: flex;
-  gap: 1.5rem;
+  gap: 0.75rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .toolbar-right {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .container {
@@ -261,8 +266,8 @@ onMounted(async () => {
   grid-template-columns: 1fr 1fr;
   gap: 0;
   overflow: hidden;
+  min-height: 0;
 }
-
 
 .editor-section {
   background: white;
@@ -271,6 +276,7 @@ onMounted(async () => {
   overflow: auto;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .output-section {
@@ -278,20 +284,21 @@ onMounted(async () => {
   padding: 0;
   overflow: auto;
   position: relative;
+  min-width: 0;
 }
-
 
 /* Bottom bar styling */
 .bottom-bar {
   background: white;
   border-top: 1px solid #e5e7eb;
-  padding: 1rem 2rem;
+  padding: 0.75rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
-  height: 60px;
+  min-height: 52px;
   flex-shrink: 0;
+  gap: 1rem;
 }
 
 .bottom-bar-left {
@@ -304,30 +311,67 @@ onMounted(async () => {
   align-items: center;
 }
 
-
-
-@media (max-width: 768px) {
+/* Tablet styles */
+@media (max-width: 1024px) {
   .toolbar {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: stretch;
+    padding: 0.75rem;
   }
   
-  .bottom-bar {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: stretch;
-    height: auto;
-    padding: 1rem;
+  .container {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .toolbar {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  
+  .toolbar-left,
+  .toolbar-right {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.5rem;
   }
   
   .container {
     grid-template-columns: 1fr;
-    height: auto;
+    grid-template-rows: 1fr 1fr;
   }
   
-  .title {
-    font-size: 1.75rem;
+  .editor-section {
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.5rem;
+  }
+  
+  .output-section {
+    min-height: 40vh;
+  }
+  
+  .bottom-bar {
+    padding: 0.5rem;
+    min-height: 48px;
+  }
+}
+
+/* Small mobile styles */
+@media (max-width: 480px) {
+  .main {
+    height: 100vh;
+  }
+  
+  .container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .editor-section,
+  .output-section {
+    flex: 1;
+    min-height: 0;
   }
 }
 </style>

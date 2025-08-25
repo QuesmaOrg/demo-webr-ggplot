@@ -105,7 +105,7 @@ onMounted(() => {
 .header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 1.5rem 2rem;
+  padding: 1rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
 }
@@ -116,18 +116,20 @@ onMounted(() => {
   align-items: center;
   max-width: 1400px;
   margin: 0 auto;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .title {
   margin: 0;
-  font-size: 2rem;
+  font-size: clamp(1.25rem, 4vw, 2rem);
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .subtitle {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: clamp(0.875rem, 2vw, 1.125rem);
   opacity: 0.9;
   font-weight: 300;
 }
@@ -137,12 +139,13 @@ onMounted(() => {
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 1rem;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 6px;
   transition: all 0.3s ease;
   background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
 }
 
 .github-link:hover {
@@ -152,8 +155,8 @@ onMounted(() => {
 }
 
 .github-icon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 
@@ -168,7 +171,7 @@ onMounted(() => {
   gap: 0.25rem;
   font-size: 0.875rem;
   font-weight: 600;
-  padding-left: 0.75rem;
+  padding-left: 0.5rem;
   border-left: 1px solid rgba(255, 255, 255, 0.3);
 }
 
@@ -186,5 +189,37 @@ onMounted(() => {
 
 .subtitle-link:hover {
   opacity: 1;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .header {
+    padding: 0.75rem;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .github-link {
+    align-self: stretch;
+    justify-content: center;
+  }
+  
+  .github-text {
+    display: none;
+  }
+  
+  .github-stars {
+    padding-left: 0.5rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .header {
+    padding: 1rem 1.5rem;
+  }
 }
 </style>

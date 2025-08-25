@@ -279,6 +279,8 @@ onUnmounted(() => {
   position: relative;
   display: flex;
   align-items: center;
+  min-width: 0;
+  flex: 1;
 }
 
 .csv-drop-zone {
@@ -287,10 +289,11 @@ onUnmounted(() => {
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
   transition: all 0.3s ease;
-  min-height: 36px;
+  min-height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
 }
 
 .csv-drop-zone:hover {
@@ -529,5 +532,60 @@ onUnmounted(() => {
   font-size: 0.75rem;
   color: #374151;
   font-family: monospace;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .file-upload {
+    width: 100%;
+  }
+  
+  .csv-drop-zone {
+    min-height: 44px;
+    padding: 0.625rem;
+  }
+  
+  .csv-options {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .drop-text {
+    display: none;
+  }
+  
+  .thin-btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    min-height: 36px;
+  }
+  
+  .csv-button {
+    width: 100%;
+    justify-content: space-between;
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  .csv-dropdown {
+    left: 0;
+    right: 0;
+    max-width: calc(100vw - 2rem);
+  }
+  
+  .url-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+@media (max-width: 480px) {
+  .csv-options {
+    width: 100%;
+  }
+  
+  .thin-btn {
+    flex: 1;
+  }
 }
 </style>

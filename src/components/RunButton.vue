@@ -42,17 +42,19 @@ const handleClick = (): void => {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .run-button {
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-  min-width: 80px;
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
+  min-width: 100px;
+  min-height: 38px;
 }
 
 .run-button.has-changes {
@@ -63,6 +65,11 @@ const handleClick = (): void => {
 
 .run-button.has-changes:hover:not(:disabled) {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.run-button.has-changes:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .run-button.no-changes {
@@ -86,5 +93,21 @@ const handleClick = (): void => {
 
 .runtime-versions:hover {
   opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .run-section {
+    width: 100%;
+  }
+  
+  .run-button {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    flex: 1;
+  }
+  
+  .runtime-versions {
+    display: none;
+  }
 }
 </style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import * as monaco from 'monaco-editor'
 
 interface Props {
@@ -18,16 +18,48 @@ const emit = defineEmits<{
 const editorRef = ref<HTMLElement>()
 let editor: monaco.editor.IStandaloneCodeEditor | null = null
 
+// Detect if we're on a mobile device
+const isMobile = computed(() => {
+  return window.innerWidth < 768 || 'ontouchstart' in window
+})
+
 onMounted(() => {
   if (!editorRef.value) {return}
 
-  editor = monaco.editor.create(editorRef.value, {
+  // Mobile-optimized settings
+  const mobileConfig = {
+    fontSize: 16, // Larger for mobile
+    lineHeight: 22,
+    scrollbar: {
+      vertical: 'auto',
+      horizontal: 'auto',
+      verticalScrollbarSize: 10,
+      horizontalScrollbarSize: 10,
+    },
+    overviewRulerLanes: 0,
+    hideCursorInOverviewRuler: true,
+    scrollBeyondLastColumn: 0,
+    renderLineHighlight: 'none',
+    cursorBlinking: 'smooth',
+    contextmenu: false, // Disable right-click menu on mobile
+  }
+
+  // Desktop settings
+  const desktopConfig = {
+    fontSize: 14,
+    lineHeight: 20,
+    scrollbar: {
+      vertical: 'auto',
+      horizontal: 'auto',
+    },
+  }
+
+  const baseConfig = {
     value: props.modelValue,
     language: 'r',
     theme: 'vs-light',
     minimap: { enabled: false },
     readOnly: props.readonly,
-    fontSize: 14,
     lineNumbers: 'on',
     roundedSelection: false,
     scrollBeyondLastLine: false,
@@ -47,7 +79,15 @@ onMounted(() => {
     quickSuggestions: false,
     parameterHints: { enabled: false },
     hover: { enabled: false },
-  })
+  }
+
+  // Merge configs based on device type
+  const config = {
+    ...baseConfig,
+    ...(isMobile.value ? mobileConfig : desktopConfig),
+  }
+
+  editor = monaco.editor.create(editorRef.value, config)
 
   editor.onDidChangeModelContent(() => {
     if (editor) {

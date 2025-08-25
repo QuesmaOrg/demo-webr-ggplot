@@ -94,6 +94,8 @@ const toggleConsole = (): void => {
   align-items: center;
   gap: 0.5rem;
   color: #6b7280;
+  min-height: 38px;
+  white-space: nowrap;
 }
 
 .console-toggle:hover {
@@ -131,5 +133,14 @@ const toggleConsole = (): void => {
 
 .toggle-arrow.open {
   transform: rotate(180deg);
+}
+
+@media (max-width: 768px) {
+  .console-toggle {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    flex: 1;
+    justify-content: center;
+  }
 }
 </style>

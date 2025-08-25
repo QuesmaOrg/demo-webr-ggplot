@@ -44,6 +44,8 @@ const handleExampleChange = (): void => {
 .example-selector {
   display: flex;
   align-items: center;
+  min-width: 0;
+  flex: 1;
 }
 
 .select {
@@ -54,7 +56,9 @@ const handleExampleChange = (): void => {
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  white-space: nowrap;
+  width: 100%;
+  max-width: 250px;
+  min-height: 38px;
 }
 
 .select:hover {
@@ -62,10 +66,21 @@ const handleExampleChange = (): void => {
   border-color: #9ca3af;
 }
 
-
 .select:focus {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+@media (max-width: 768px) {
+  .example-selector {
+    width: 100%;
+  }
+  
+  .select {
+    max-width: none;
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
 }
 </style>
