@@ -51,14 +51,15 @@ defineProps<Props>()
 .status-indicator {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
+  gap: 0.375rem;
+  padding: 0.375rem 0.625rem;
   border-radius: 6px;
   font-size: 0.875rem;
   font-weight: 500;
   background: #f3f4f6;
   border: 1px solid #d1d5db;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  min-height: 32px;
 }
 
 .status-indicator.loading {
@@ -84,8 +85,8 @@ defineProps<Props>()
 }
 
 .spinner {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border: 2px solid #f59e0b;
   border-top: 2px solid transparent;
   border-radius: 50%;

@@ -47,14 +47,14 @@ const handleClick = (): void => {
 
 .run-button {
   border: none;
-  padding: 0.625rem 1.25rem;
+  padding: 0.5rem 1rem;
   border-radius: 6px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
   min-width: 100px;
-  min-height: 38px;
+  min-height: 36px;
 }
 
 .run-button.has-changes {
@@ -101,9 +101,9 @@ const handleClick = (): void => {
   }
   
   .run-button {
-    min-height: 36px;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
+    min-height: 32px;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
   }
   
   .runtime-versions {

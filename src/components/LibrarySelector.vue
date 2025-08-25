@@ -4,7 +4,9 @@ import { ref, onMounted, onUnmounted } from 'vue'
 interface Props {
   installedLibraries: Set<string>
   isLoading: boolean
+  isReady?: boolean
   packageVersions: Record<string, string>
+  showStatus?: boolean
 }
 
 const props = defineProps<Props>()
@@ -62,12 +64,22 @@ onUnmounted(() => {
     <button 
       :disabled="isLoading"
       class="libraries-button"
-      :class="{ 'disabled': isLoading }"
+      :class="{ 
+        'disabled': isLoading && !showStatus,
+        'status-loading': showStatus && isLoading,
+        'status-ready': showStatus && isReady && !isLoading
+      }"
       @click="toggleDropdown"
     >
+      <span 
+        v-if="isLoading && showStatus" 
+        class="status-spinner"
+      />
       <span class="libraries-text">
-        <span v-if="isLoading">WebR...</span>
-        <span v-else>WebR ✓</span>
+        <span v-if="showStatus && isLoading">WebR...</span>
+        <span v-else-if="showStatus && isReady">WebR</span>
+        <span v-else-if="showStatus">WebR</span>
+        <span v-else>Libraries</span>
       </span>
       <span
         class="dropdown-arrow"
@@ -122,25 +134,52 @@ onUnmounted(() => {
 .libraries-button {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.375rem;
   background: #f3f4f6;
   border: 1px solid #d1d5db;
   border-radius: 6px;
-  padding: 0.5rem 0.75rem;
+  padding: 0.375rem 0.625rem;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   white-space: nowrap;
+  min-height: 32px;
 }
 
 .libraries-button:hover:not(.disabled) {
   background: #e5e7eb;
-  border-color: #9ca3af;
+  border-color: #3b82f6;
 }
 
 .libraries-button.disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.libraries-button.status-loading {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+}
+
+.libraries-button.status-ready {
+  background: #ecfdf5;
+  border-color: #10b981;
+  color: #065f46;
+}
+
+.status-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #f59e0b;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .libraries-icon {
@@ -245,22 +284,27 @@ onUnmounted(() => {
 
 /* Mobile styles */
 @media (max-width: 768px) {
+  .library-selector {
+    display: flex;
+    align-items: center;
+  }
+  
   .libraries-button {
     padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    min-height: 24px;
+    font-size: 0.8125rem;
+    min-height: 28px;
     border-radius: 4px;
     gap: 0.25rem;
     margin-left: auto;
   }
   
   .libraries-text {
-    font-weight: 600;
-    color: #10b981;
+    font-weight: 500;
   }
   
-  .libraries-text span:first-child {
-    color: #6b7280;
+  .status-spinner {
+    width: 10px;
+    height: 10px;
   }
   
   .dropdown-arrow {

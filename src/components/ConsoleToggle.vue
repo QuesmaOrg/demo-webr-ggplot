@@ -89,12 +89,12 @@ const toggleConsole = (): void => {
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   color: #6b7280;
-  min-height: 38px;
+  min-height: 36px;
   white-space: nowrap;
 }
 
@@ -137,9 +137,9 @@ const toggleConsole = (): void => {
 
 @media (max-width: 768px) {
   .console-toggle {
-    min-height: 36px;
-    font-size: 0.875rem;
-    padding: 0.5rem 0.625rem;
+    min-height: 32px;
+    font-size: 0.8125rem;
+    padding: 0.375rem 0.5rem;
   }
 }
 </style>

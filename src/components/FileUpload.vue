@@ -4,6 +4,7 @@ import type { CsvData } from '@/types'
 
 const props = defineProps<{
   uploadedFile?: CsvData | null
+  compact?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -196,13 +197,13 @@ onUnmounted(() => {
           class="thin-btn"
           @click="fileInputRef?.click()"
         >
-          Upload file
+          {{ props.compact ? 'CSV' : 'Upload CSV file' }}
         </button>
         <button
           class="thin-btn"
           @click="showUrlInput = true"
         >
-          Load from URL
+          {{ props.compact ? 'URL' : 'Load from URL' }}
         </button>
       </div>
     </div>
@@ -278,18 +279,21 @@ onUnmounted(() => {
   position: relative;
   display: flex;
   align-items: center;
+  min-width: 0;
 }
 
 .csv-drop-zone {
   background: #fafafa;
   border: 2px dashed #d1d5db;
   border-radius: 6px;
-  padding: 0.375rem 0.5rem;
+  padding: 0.375rem 0.625rem;
   transition: all 0.3s ease;
-  min-height: 36px;
+  min-height: 32px;
+  max-height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
 }
 
 .csv-drop-zone:hover {
@@ -319,6 +323,8 @@ onUnmounted(() => {
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  font-weight: 500;
+  line-height: 1;
 }
 
 .thin-btn:hover {
@@ -371,11 +377,12 @@ onUnmounted(() => {
   background: #f3f4f6;
   border: 1px solid #d1d5db;
   border-radius: 6px;
-  padding: 0.5rem 0.75rem;
+  padding: 0.375rem 0.625rem;
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
+  min-height: 32px;
 }
 
 .csv-button:hover {
@@ -525,8 +532,14 @@ onUnmounted(() => {
 
 /* Mobile styles */
 @media (max-width: 768px) {
+  .file-upload {
+    display: flex;
+    align-items: center;
+  }
+  
   .csv-drop-zone {
     min-height: 28px;
+    max-height: 28px;
     padding: 0.25rem 0.375rem;
     border-radius: 4px;
   }
@@ -538,11 +551,13 @@ onUnmounted(() => {
   .thin-btn {
     padding: 0.125rem 0.25rem;
     font-size: 0.625rem;
+    line-height: 1;
   }
   
   .csv-button {
-    padding: 0.25rem 0.375rem;
-    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8125rem;
+    min-height: 28px;
   }
   
   .csv-dropdown {

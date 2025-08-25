@@ -166,49 +166,34 @@ onMounted(async () => {
     <AppHeader />
 
     <main class="main">
-      <!-- Mobile toolbar -->
-      <div
-        v-if="isMobile"
-        class="mobile-toolbar"
-      >
-        <FileUpload 
-          :uploaded-file="currentCsvData"
-          @file-uploaded="handleFileUpload" 
-          @file-removed="handleFileRemoved" 
-        />
-        <ExampleSelector @example-selected="handleExampleSelect" />
-        <LibrarySelector 
-          :installed-libraries="installedLibraries" 
-          :is-loading="isInitializing"
-          :package-versions="packageVersions"
-          @toggle-library="toggleLibrary"
-        />
-      </div>
-
-      <!-- Desktop toolbar -->
-      <div
-        v-else
-        class="toolbar"
-      >
-        <div class="toolbar-left">
+      <!-- Unified responsive toolbar -->
+      <div class="toolbar" :class="{ 'mobile': isMobile }">
+        <div class="toolbar-group toolbar-left">
           <FileUpload 
             :uploaded-file="currentCsvData"
+            :compact="isMobile"
             @file-uploaded="handleFileUpload" 
             @file-removed="handleFileRemoved" 
           />
-          <ExampleSelector @example-selected="handleExampleSelect" />
+          <ExampleSelector 
+            :compact="isMobile"
+            @example-selected="handleExampleSelect" 
+          />
         </div>
-        <div class="toolbar-right">
+        <div class="toolbar-group toolbar-right">
           <WebRStatus 
+            v-if="!isMobile"
             :is-ready="isReady" 
-            :is-loading="isInitializing" 
+            :is-loading="isLoading" 
             :loading-status="loadingStatus"
             :webr-version="webrVersion"
           />
           <LibrarySelector 
             :installed-libraries="installedLibraries" 
-            :is-loading="isInitializing"
+            :is-loading="isLoading"
+            :is-ready="isReady"
             :package-versions="packageVersions"
+            :show-status="isMobile"
             @toggle-library="toggleLibrary"
           />
         </div>
@@ -322,20 +307,8 @@ onMounted(async () => {
   flex-direction: column;
   overflow: hidden;
   min-height: 0;
+  position: relative;
 }
-
-/* Mobile toolbar */
-.mobile-toolbar {
-  background: white;
-  border-bottom: 1px solid #e5e7eb;
-  padding: 0.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  flex-shrink: 0;
-  height: 32px;
-}
-
 
 /* Mobile split view */
 .mobile-container {
@@ -344,6 +317,7 @@ onMounted(async () => {
   overflow: hidden;
   position: relative;
   width: 100%;
+  min-height: 0;
 }
 
 .panel-wrapper {
@@ -409,28 +383,61 @@ onMounted(async () => {
   pointer-events: none;
 }
 
-/* Desktop toolbar */
+/* Unified responsive toolbar */
 .toolbar {
   background: white;
   border-bottom: 1px solid #e5e7eb;
   padding: 0.75rem 1rem;
-  display: flex;
+  display: flex !important;
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
   gap: 1rem;
+  min-height: 44px;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative;
+  z-index: 10;
+}
+
+.toolbar.mobile {
+  padding: 0.375rem 0.5rem;
+  gap: 0.375rem;
+  min-height: 40px;
+  height: 40px;
+  display: flex !important;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.toolbar.mobile .toolbar-group {
+  gap: 0.375rem;
 }
 
 .toolbar-left {
+  flex: 1;
   display: flex;
-  gap: 0.75rem;
   align-items: center;
+  gap: 0.75rem;
+}
+
+.toolbar.mobile .toolbar-left {
+  gap: 0.375rem;
 }
 
 .toolbar-right {
   display: flex;
-  gap: 0.75rem;
   align-items: center;
+  gap: 0.75rem;
+}
+
+.toolbar.mobile .toolbar-right {
+  gap: 0.375rem;
 }
 
 
@@ -499,10 +506,6 @@ onMounted(async () => {
 
 /* Mobile styles */
 @media (max-width: 768px) {
-  .mobile-toolbar {
-    display: flex;
-  }
-  
   .mobile-container {
     display: flex;
     flex: 1;
