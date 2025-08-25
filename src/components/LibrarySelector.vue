@@ -36,9 +36,7 @@ const handleToggle = (library: string, event: Event): void => {
 const dropdownRef = ref<HTMLElement>()
 
 const toggleDropdown = (): void => {
-  if (!props.isLoading) {
-    isOpen.value = !isOpen.value
-  }
+  isOpen.value = !isOpen.value
 }
 
 const handleClickOutside = (event: MouseEvent): void => {
@@ -62,10 +60,8 @@ onUnmounted(() => {
     class="library-selector"
   >
     <button 
-      :disabled="isLoading"
       class="libraries-button"
       :class="{ 
-        'disabled': isLoading && !showStatus,
         'status-loading': showStatus && isLoading,
         'status-ready': showStatus && isReady && !isLoading
       }"
@@ -91,9 +87,6 @@ onUnmounted(() => {
       v-if="isOpen"
       class="libraries-dropdown"
     >
-      <div class="libraries-header">
-        <span class="header-text">Available Libraries</span>
-      </div>
       <div class="libraries-list">
         <label 
           v-for="library in availableLibraries" 
@@ -114,7 +107,7 @@ onUnmounted(() => {
               <span
                 v-if="installedLibraries.has(library.name) && packageVersions[library.name]" 
                 class="library-version"
-              >{{ packageVersions[library.name] }}</span>
+              >v{{ packageVersions[library.name] }}</span>
             </div>
             <span class="library-desc">{{ library.description }}</span>
           </div>
@@ -146,14 +139,9 @@ onUnmounted(() => {
   min-height: 32px;
 }
 
-.libraries-button:hover:not(.disabled) {
+.libraries-button:hover {
   background: #e5e7eb;
   border-color: #3b82f6;
-}
-
-.libraries-button.disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .libraries-button.status-loading {
@@ -202,9 +190,10 @@ onUnmounted(() => {
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 50;
-  min-width: 240px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 220px;
+  overflow-y: auto;
 }
 
 .libraries-header {
@@ -220,14 +209,14 @@ onUnmounted(() => {
 }
 
 .libraries-list {
-  padding: 0.5rem;
+  padding: 0.375rem;
 }
 
 .library-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem;
+  gap: 0.5rem;
+  padding: 0.375rem;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -244,7 +233,9 @@ onUnmounted(() => {
 
 .library-checkbox {
   margin: 0;
+  margin-top: 2px;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .library-checkbox:disabled {
@@ -254,7 +245,8 @@ onUnmounted(() => {
 .library-info {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.125rem;
+  flex: 1;
 }
 
 .library-name-row {
@@ -262,6 +254,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
+  min-height: 1.2em;
 }
 
 .library-name {
@@ -271,15 +264,17 @@ onUnmounted(() => {
 }
 
 .library-version {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: #059669;
-  font-family: monospace;
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .library-desc {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: #6b7280;
+  line-height: 1.3;
 }
 
 /* Mobile styles */
@@ -312,8 +307,8 @@ onUnmounted(() => {
   }
   
   .libraries-dropdown {
-    max-height: 60vh;
     overflow-y: auto;
+    z-index: 2000;
   }
 }
 </style>
