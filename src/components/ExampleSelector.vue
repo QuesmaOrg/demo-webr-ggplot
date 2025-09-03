@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { examples } from '@/data/examples'
 import type { RExample } from '@/types'
 
@@ -15,39 +15,84 @@ const emit = defineEmits<{
 
 // Initialize with the first example's id
 const selectedExample = ref<string>(examples[0].id)
+const isOpen = ref(false)
+const dropdownRef = ref<HTMLElement>()
 
 const currentExample = computed(() => {
   return examples.find((ex) => ex.id === selectedExample.value) || null
 })
 
-const handleExampleChange = (): void => {
-  if (currentExample.value) {
-    emit('exampleSelected', currentExample.value)
+const handleExampleSelect = (exampleId: string): void => {
+  selectedExample.value = exampleId
+  isOpen.value = false
+  const example = examples.find((ex) => ex.id === exampleId)
+  if (example) {
+    emit('exampleSelected', example)
   }
 }
+
+const toggleDropdown = (): void => {
+  isOpen.value = !isOpen.value
+}
+
+const handleClickOutside = (event: MouseEvent): void => {
+  if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
+    isOpen.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
 
 <template>
-  <div class="example-selector">
-    <select
-      id="example-select"
-      v-model="selectedExample"
-      class="select"
-      @change="handleExampleChange"
+  <div
+    ref="dropdownRef"
+    class="example-selector"
+  >
+    <button
+      class="example-button"
+      @click="toggleDropdown"
     >
-      <option
-        v-for="example in examples"
-        :key="example.id"
-        :value="example.id"
-      >
-        {{ example.title }}
-      </option>
-    </select>
+      <span class="example-text">
+        {{ currentExample?.title || 'Select example' }}
+      </span>
+      <span
+        class="dropdown-arrow"
+        :class="{ 'open': isOpen }"
+      >▼</span>
+    </button>
+    
+    <div
+      v-if="isOpen"
+      class="example-dropdown"
+    >
+      <div class="example-list">
+        <button
+          v-for="example in examples"
+          :key="example.id"
+          class="example-item"
+          :class="{ 'selected': example.id === selectedExample }"
+          @click="handleExampleSelect(example.id)"
+        >
+          <div class="example-info">
+            <span class="example-name">{{ example.title }}</span>
+            <span class="example-desc">{{ example.description }}</span>
+          </div>
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .example-selector {
+  position: relative;
   display: flex;
   align-items: center;
   min-width: 0;
@@ -55,34 +100,104 @@ const handleExampleChange = (): void => {
   max-width: 250px;
 }
 
-.select {
+.example-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   background: #f3f4f6;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   padding: 0.375rem 0.625rem;
-  padding-right: 1.5rem;
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  min-height: 32px;
   width: 100%;
   max-width: 200px;
-  min-height: 32px;
-  appearance: none;
-  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2714%27%20height%3D%278%27%20viewBox%3D%270%200%2014%208%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%3E%3Cpath%20d%3D%27M1%201l6%206%206-6%27%20stroke%3D%27%236B7280%27%20stroke-width%3D%272%27%20fill%3D%27none%27%20fill-rule%3D%27evenodd%27%2F%3E%3C%2Fsvg%3E');
-  background-repeat: no-repeat;
-  background-position: right 0.5rem center;
-  background-size: 12px;
+  justify-content: space-between;
 }
 
-.select:hover {
+.example-button:hover {
   background: #e5e7eb;
   border-color: #3b82f6;
 }
 
-.select:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+.example-text {
+  font-weight: 500;
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-arrow {
+  font-size: 0.75rem;
+  transition: transform 0.3s ease;
+  margin-left: 0.25rem;
+  flex-shrink: 0;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+.example-dropdown {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 280px;
+  max-width: 350px;
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+.example-list {
+  padding: 0.375rem;
+}
+
+.example-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+}
+
+.example-item:hover {
+  background: #f3f4f6;
+}
+
+.example-item.selected {
+  background: #e0f2fe;
+}
+
+.example-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  width: 100%;
+}
+
+.example-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.example-desc {
+  font-size: 0.6875rem;
+  color: #6b7280;
+  line-height: 1.3;
 }
 
 @media (max-width: 768px) {
@@ -93,15 +208,24 @@ const handleExampleChange = (): void => {
     align-items: center;
   }
   
-  .select {
+  .example-button {
     max-width: none;
     min-height: 28px;
     padding: 0.25rem 0.5rem;
-    padding-right: 1.25rem;
     font-size: 0.8125rem;
     border-radius: 4px;
-    background-size: 10px;
-    background-position: right 0.375rem center;
+    gap: 0.25rem;
+  }
+  
+  .dropdown-arrow {
+    font-size: 0.625rem;
+  }
+  
+  .example-dropdown {
+    left: 0;
+    right: 0;
+    max-width: calc(100vw - 2rem);
+    z-index: 2000;
   }
 }
 </style>

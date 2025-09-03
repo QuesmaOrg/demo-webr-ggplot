@@ -16,7 +16,7 @@ const fileInputRef = ref<HTMLInputElement>()
 const isOpen = ref(false)
 const isDragging = ref(false)
 const dropdownRef = ref<HTMLElement>()
-const showUrlInput = ref(false)
+const showUrlModal = ref(false)
 const urlInput = ref('')
 
 const parseCsvInfo = (content: string): { rows: number; columns: number; columnNames: string[] } => {
@@ -101,7 +101,7 @@ const loadFromUrl = async (): Promise<void> => {
       columns,
       columnNames
     }
-    showUrlInput.value = false
+    showUrlModal.value = false
     urlInput.value = ''
     emit('fileUploaded', csvData)
   } catch (error) {
@@ -112,7 +112,7 @@ const loadFromUrl = async (): Promise<void> => {
 
 const removeFile = (): void => {
   isOpen.value = false
-  showUrlInput.value = false
+  showUrlModal.value = false
   urlInput.value = ''
   if (fileInputRef.value) {
     fileInputRef.value.value = ''
@@ -154,37 +154,8 @@ onUnmounted(() => {
       @dragover="handleDragOver"
       @dragleave="handleDragLeave"
     >
-      <!-- URL Input Section (when active) -->
-      <div
-        v-if="showUrlInput"
-        class="url-input-section"
-      >
-        <input 
-          v-model="urlInput"
-          type="url"
-          placeholder="Enter CSV URL (e.g., https://example.com/data.csv)"
-          class="url-input"
-          @keyup.enter="loadFromUrl"
-        >
-        <button
-          class="thin-btn primary"
-          @click="loadFromUrl"
-        >
-          Load
-        </button>
-        <button
-          class="thin-btn"
-          @click="showUrlInput = false"
-        >
-          Cancel
-        </button>
-      </div>
-      
       <!-- Default CSV upload options -->
-      <div
-        v-else
-        class="csv-options"
-      >
+      <div class="csv-options">
         <input
           ref="fileInputRef"
           type="file"
@@ -201,7 +172,7 @@ onUnmounted(() => {
         </button>
         <button
           class="thin-btn"
-          @click="showUrlInput = true"
+          @click="showUrlModal = true"
         >
           {{ props.compact ? 'URL' : 'Load from URL' }}
         </button>
@@ -267,6 +238,48 @@ onUnmounted(() => {
           <div class="code-section">
             <span class="code-header">Load in R:</span>
             <code class="code-snippet">data &lt;- read.csv("/tmp/{{ props.uploadedFile.name }}")</code>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- URL Input Modal -->
+    <div
+      v-if="showUrlModal"
+      class="url-modal"
+    >
+      <div class="url-modal-content">
+        <div class="url-modal-header">
+          <span class="url-modal-title">Load CSV from URL</span>
+          <button
+            class="url-modal-close"
+            @click="showUrlModal = false; urlInput = ''"
+          >
+            ×
+          </button>
+        </div>
+        <div class="url-modal-body">
+          <input
+            v-model="urlInput"
+            type="url"
+            placeholder="https://example.com/data.csv"
+            class="url-input"
+            @keyup.enter="loadFromUrl"
+          >
+          <div class="url-modal-actions">
+            <button
+              class="url-btn primary"
+              :disabled="!urlInput.trim()"
+              @click="loadFromUrl"
+            >
+              Load CSV
+            </button>
+            <button
+              class="url-btn"
+              @click="showUrlModal = false; urlInput = ''"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       </div>
@@ -341,28 +354,6 @@ onUnmounted(() => {
 .thin-btn.primary:hover {
   background: #2563eb;
   border-color: #2563eb;
-}
-
-.url-input-section {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  width: 100%;
-}
-
-.url-input {
-  flex: 1;
-  padding: 0.375rem 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  min-width: 200px;
-}
-
-.url-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 1px #3b82f6;
 }
 
 
@@ -566,10 +557,171 @@ onUnmounted(() => {
     max-width: calc(100vw - 2rem);
   }
   
+}
+
+/* URL Modal Styles */
+.url-modal {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  right: auto;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 320px;
+  max-width: 400px;
+}
+
+.url-modal-content {
+  width: 100%;
+}
+
+.url-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 6px 6px 0 0;
+}
+
+.url-modal-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.url-modal-close {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.url-modal-close:hover {
+  background: #f3f4f6;
+  color: #ef4444;
+}
+
+.url-modal-body {
+  padding: 0.75rem;
+}
+
+.url-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.url-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.url-modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.url-btn {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+  color: #374151;
+  font-weight: 500;
+}
+
+.url-btn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.url-btn.primary {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.url-btn.primary:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.url-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.url-btn.primary:disabled:hover {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+@media (max-width: 768px) {
+  .file-upload {
+    display: flex;
+    align-items: center;
+  }
+  
+  .csv-drop-zone {
+    min-height: 28px;
+    max-height: 28px;
+    padding: 0.25rem 0.375rem;
+    border-radius: 4px;
+  }
+  
+  .csv-options {
+    gap: 0.25rem;
+  }
+  
+  .thin-btn {
+    padding: 0.125rem 0.25rem;
+    font-size: 0.625rem;
+    line-height: 1;
+  }
+  
+  .csv-button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8125rem;
+    min-height: 28px;
+  }
+  
+  .csv-dropdown {
+    left: 0;
+    right: 0;
+    max-width: calc(100vw - 2rem);
+  }
+  
+  .url-modal {
+    left: 0;
+    right: 0;
+    max-width: calc(100vw - 2rem);
+    z-index: 2000;
+  }
+  
   .url-input {
     font-size: 16px; /* Prevents zoom on iOS */
-    padding: 0.25rem 0.375rem;
-    min-height: 24px;
   }
 }
 </style>
