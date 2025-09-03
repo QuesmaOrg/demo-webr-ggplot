@@ -9,7 +9,7 @@ interface Props {
   showStatus?: boolean
 }
 
-const props = defineProps<Props>()
+const _props = defineProps<Props>()
 
 const emit = defineEmits<{
   toggleLibrary: [library: string, install: boolean]

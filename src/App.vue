@@ -40,7 +40,7 @@ const currentCsvData = ref<CsvData | null>(null)
 const {
   isReady,
   isLoading,
-  isInitializing,
+  isInitializing: _isInitializing,
   isExecuting,
   loadingStatus,
   installedLibraries,
@@ -167,7 +167,10 @@ onMounted(async () => {
 
     <main class="main">
       <!-- Unified responsive toolbar -->
-      <div class="toolbar" :class="{ 'mobile': isMobile }">
+      <div
+        class="toolbar"
+        :class="{ 'mobile': isMobile }"
+      >
         <div class="toolbar-group toolbar-left">
           <FileUpload 
             :uploaded-file="currentCsvData"

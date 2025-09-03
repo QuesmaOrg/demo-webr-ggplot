@@ -1,10 +1,11 @@
-import type { RExample } from '@/types'
+import type { RExample } from "@/types";
 
 export const examples: RExample[] = [
   {
-    id: 'iris-petal-scatter',
-    title: 'Iris sepal dimensions',
-    description: 'Explore the relationship between sepal length and width across iris species',
+    id: "iris-petal-scatter",
+    title: "Iris sepal dimensions",
+    description:
+      "Explore the relationship between sepal length and width across iris species",
     code: `library(ggplot2)
 
 # Load the classic iris dataset
@@ -21,9 +22,9 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
   theme(legend.position = "bottom")`,
   },
   {
-    id: 'kawaii-iris',
-    title: 'Kawaii-style iris visualization',
-    description: 'A playful, pastel visualization of iris sepal dimensions',
+    id: "kawaii-iris",
+    title: "Kawaii-style iris visualization",
+    description: "A playful, pastel visualization of iris sepal dimensions",
     code: `library(ggplot2)
 
 # Load iris dataset for a cute visualization
@@ -38,15 +39,15 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
                                 "versicolor" = "#DDA0DD",   # Plum  
                                 "virginica" = "#87CEEB")) + # Sky blue
   # Add cute title and labels
-  labs(title = "✿ Kawaii Iris Garden ✿",
-       x = "Sepal Length ♡",
-       y = "Sepal Width ♡") +
+  labs(title = "✿ Kawaii Iris Meadow ✿",
+       x = "Sepal Length (cm) ♡",
+       y = "Sepal Width (cm) ♡") +
   # Simple kawaii theme
   theme_minimal() +
   theme(
-    plot.background = element_rect(fill = "#FFF0F5", color = NA),
+    plot.background = element_rect(fill = "#FFFAFA", color = NA),
     panel.background = element_rect(fill = "#FFFAFA", color = NA),
-    panel.grid = element_line(color = "#FFE0F0", size = 0.3),
+    panel.grid = element_line(color = "#FFE0F0", linewidth = 0.3),
     text = element_text(color = "#FF1493"),
     plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
     legend.position = "bottom",
@@ -57,9 +58,10 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
   )`,
   },
   {
-    id: 'iris-violin-panels',
-    title: 'Iris measurements distribution',
-    description: 'Violin plots showing distribution of all iris measurements in a 2x2 panel',
+    id: "iris-violin-panels",
+    title: "Iris measurements distribution",
+    description:
+      "Violin plots showing distribution of all iris measurements in a 2x2 panel",
     code: `library(ggplot2)
 library(tidyr)
 
@@ -92,10 +94,10 @@ ggplot(iris_long, aes(x = Species, y = Value, fill = Species)) +
   )`,
   },
   {
-    id: 'metal-bands-happiness',
-    title: 'Metal bands vs happiness',
-    description: 'Surprising correlation: more metal bands = happier countries',
-    csvUrl: './metal_bands_happiness.csv',
+    id: "metal-bands-happiness",
+    title: "Metal bands vs happiness",
+    description: "Surprising correlation: more metal bands = happier countries",
+    csvUrl: "./metal_bands_happiness.csv",
     code: `library(ggplot2)
 library(ggrepel)
 
@@ -115,13 +117,13 @@ ggplot(data, aes(x = Metal.bands.per.capita, y = Score, label = Country.or.regio
   theme_minimal()`,
   },
   {
-    id: 'custom-csv-template',
-    title: 'Your CSV template',
-    description: 'Starting point for analyzing your own data',
+    id: "custom-csv-template",
+    title: "Your CSV template",
+    description: "Starting point for analyzing your own data",
     code: `library(ggplot2)
 
 # Upload your CSV file using the button above
 # Then change "your_filename.csv" to your actual filename and press Run
 data <- read.csv("/tmp/your_filename.csv", stringsAsFactors = FALSE)`,
   },
-]
+];
