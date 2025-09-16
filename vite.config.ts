@@ -1,24 +1,25 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
 
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/demo-webr-ggplot/' : '/',
+  base:
+    process.env.NODE_ENV === "production" ? "/webr-ggplot-playground/" : "/",
   plugins: [vue()],
   resolve: {
     alias: {
-      '@': '/src'
-    }
+      "@": "/src",
+    },
   },
   server: {
     headers: {
-      'Cross-Origin-Embedder-Policy': 'require-corp',
-      'Cross-Origin-Opener-Policy': 'same-origin'
-    }
+      "Cross-Origin-Embedder-Policy": "require-corp",
+      "Cross-Origin-Opener-Policy": "same-origin",
+    },
   },
   optimizeDeps: {
-    exclude: ['webr']
+    exclude: ["webr"],
   },
   define: {
-    global: 'globalThis'
-  }
-})
+    global: "globalThis",
+  },
+});

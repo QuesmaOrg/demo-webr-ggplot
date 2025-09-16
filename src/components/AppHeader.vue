@@ -1,69 +1,67 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted } from "vue";
 
 // Constants
-const GITHUB_REPO_OWNER = 'QuesmaOrg'
-const GITHUB_REPO_NAME = 'demo-webr-ggplot'
-const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}`
+const GITHUB_REPO_OWNER = "QuesmaOrg";
+const GITHUB_REPO_NAME = "webr-ggplot-playground";
+const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}`;
 
 // Types
 interface GitHubRepo {
-  stargazers_count: number
-  [key: string]: unknown
+  stargazers_count: number;
+  [key: string]: unknown;
 }
 
 // GitHub stars state
-const githubStars = ref<number | null>(null)
+const githubStars = ref<number | null>(null);
 
 // Icon paths
 const githubIcon = {
   viewBox: "0 0 16 16",
-  path: "M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
-}
+  path: "M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z",
+};
 
 const starIcon = {
-  viewBox: "0 0 16 16", 
-  path: "M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"
-}
+  viewBox: "0 0 16 16",
+  path: "M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z",
+};
 
 // Fetch GitHub stars
 const fetchGitHubStars = async (): Promise<void> => {
   try {
-    const response = await fetch(GITHUB_API_URL)
+    const response = await fetch(GITHUB_API_URL);
     if (response.ok) {
-      const data = await response.json() as GitHubRepo
-      githubStars.value = data.stargazers_count
+      const data = (await response.json()) as GitHubRepo;
+      githubStars.value = data.stargazers_count;
     }
   } catch (error) {
-    console.error('Failed to fetch GitHub stars:', error)
+    console.error("Failed to fetch GitHub stars:", error);
   }
-}
+};
 
 onMounted(() => {
-  void fetchGitHubStars()
-})
+  void fetchGitHubStars();
+});
 </script>
 
 <template>
   <header class="header">
     <div class="header-content">
       <div>
-        <h1 class="title">
-          WebR ggplot2 & dplyr Demo
-        </h1>
+        <h1 class="title">WebR ggplot2 Playground</h1>
         <p class="subtitle">
-          Interactive R data viz entirely in your browser 
-          (<a
+          Interactive R data viz entirely in your browser (<a
             href="https://quesma.com/blog-detail/sandboxing-ai-generated-code-why-we-moved-from-webr-to-aws-lambda"
             target="_blank"
             class="subtitle-link"
-          >a bit more context</a>)
+            >a bit more context</a
+          >)
         </p>
       </div>
       <a
-        href="https://github.com/QuesmaOrg/demo-webr-ggplot"
-        target="_blank" 
-        rel="noopener noreferrer" 
+        href="https://github.com/QuesmaOrg/webr-ggplot-playground"
+        target="_blank"
+        rel="noopener noreferrer"
         class="github-link"
         aria-label="View on GitHub"
       >
@@ -73,26 +71,17 @@ onMounted(() => {
           width="16"
           height="16"
         >
-          <path
-            fill="currentColor"
-            :d="githubIcon.path"
-          />
+          <path fill="currentColor" :d="githubIcon.path" />
         </svg>
         <span class="github-text">View on GitHub</span>
-        <span
-          v-if="githubStars !== null"
-          class="github-stars"
-        >
+        <span v-if="githubStars !== null" class="github-stars">
           <svg
             :viewBox="starIcon.viewBox"
             width="14"
             height="14"
             class="star-icon"
           >
-            <path
-              fill="currentColor"
-              :d="starIcon.path"
-            />
+            <path fill="currentColor" :d="starIcon.path" />
           </svg>
           {{ githubStars }}
         </span>
@@ -196,27 +185,27 @@ onMounted(() => {
   .header {
     padding: 0.5rem;
   }
-  
+
   .header-content {
     flex-direction: row;
     align-items: center;
     gap: 0.5rem;
   }
-  
+
   .title {
     font-size: 1.125rem;
     margin-bottom: 0;
   }
-  
+
   .subtitle {
     display: none;
   }
-  
+
   .github-link {
     margin-left: auto;
     padding: 0.375rem 0.5rem;
   }
-  
+
   .github-text,
   .github-stars {
     display: none;

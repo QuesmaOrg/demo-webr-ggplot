@@ -1,12 +1,12 @@
-# WebR ggplot2 Demo
+# WebR ggplot2 Playground
 
 Interactive R data visualization in the browser using [WebR](https://webr.r-wasm.org/) (R in WebAssembly) and [ggplot2](https://ggplot2.tidyverse.org/) (the best charting library ever).
 
-![WebR ggplot2 Demo Screenshot](./public/webr-ggplot2-screenshot.png)
+![WebR ggplot2 Playground Screenshot](./public/webr-ggplot2-screenshot.png)
 
 ## What is it?
 
-A web application that runs R code directly in your browser - no server required. Features live code editing, CSV upload, and interactive plots. Try it online at [quesmaorg.github.io/demo-webr-ggplot](https://quesmaorg.github.io/demo-webr-ggplot/).
+A web application that runs R code directly in your browser - no server required. Features live code editing, CSV upload, and interactive plots. Try it online at [quesmaorg.github.io/webr-ggplot-playground](https://quesmaorg.github.io/webr-ggplot-playground/).
 
 For more context, see [our recent blog post on sandboxing AI-generated code](https://quesma.com/blog-detail/sandboxing-ai-generated-code-why-we-moved-from-webr-to-aws-lambda).
 
@@ -21,8 +21,8 @@ Prerequisites:
 
 ```bash
 # Clone repository
-git clone https://github.com/QuesmaOrg/demo-webr-ggplot.git
-cd demo-webr-ggplot
+git clone https://github.com/QuesmaOrg/webr-ggplot-playground.git
+cd webr-ggplot-playground
 
 # Install dependencies
 pnpm install
